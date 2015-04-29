@@ -67,11 +67,11 @@ class Army(CircleSprite):
 class Ameosis(Game):
     def __init__(self, surface, clock, *objs, **kwa):
         Game.__init__(self, surface, clock, **kwa)
-
         self.__objs = list(objs)
         self._drag_handler.update(objs)
         self.__spawn_size = 1
         self.__spawn_team = 0
+        self.__simulate = False
 
     @property
     def spawn_size(self):
@@ -109,6 +109,8 @@ class Ameosis(Game):
             self.spawn_team += 1
         elif ev.key == K_LEFT:
             self.spawn_team -= 1
+        elif ev.key == K_s:
+            self.__simulate = not self.__simulate
 
     def ev_mouse_down(self, ev):
         Game.ev_mouse_down(self, ev)
@@ -117,15 +119,10 @@ class Ameosis(Game):
             self.__objs.append(army)
             self._drag_handler.add(army)
 
-    def draw_debug(self):
-        self._surface.blit(
-            self._debug_font.render(
-                        "Size: %s" % (self.__spawn_size), 1, (240, 240, 240)),
-            (8, 28))
-        self._surface.blit(
-            self._debug_font.render(
-                        "Team: %s" % (self.__spawn_team), 1, (240, 240, 240)),
-            (8, 28+18))
+    def update(self):
+        self._debug_lines.append(("Size: %s" % (self.__spawn_size), 1, (240, 240, 240)))
+        self._debug_lines.append(("Team: %s" % (self.__spawn_team), 1, (240, 240, 240)))
+        self._debug_lines.append(("Simulate: %s" % (self.__simulate), 1, (240, 240, 240)))
 
     def draw(self):
         Game.draw(self)

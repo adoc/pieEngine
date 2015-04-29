@@ -81,6 +81,8 @@ class Game(EventsMixin):
         self.__background.fill(background_color)
 
         self._debug_font = pygame.font.Font(None, 18)
+        self._debug_pos = (8, 28)
+        self._debug_lines = []
 
     def ev_mouse_down(self, ev):
         if ev.button == 1:
@@ -95,6 +97,18 @@ class Game(EventsMixin):
     def ev_mouse_motion(self, ev):
         if self.__mouse_left_down:
             self._drag_handler.move(*ev.pos)
+
+    def draw_debug(self):
+        for n, line in enumerate(self._debug_lines):
+            pos = list(self._debug_pos)
+            pos[1] = n * self._debug_font.get_linesize() + self._debug_pos[1]
+            self._surface.blit(
+                self._debug_font.render(*line),
+                pos)
+        self._debug_lines = []
+
+    def update(self):
+        pass
 
     def quit(self):
         self.__done = True

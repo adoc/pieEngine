@@ -21,5 +21,6 @@ if __name__ == "__main__":
 
         game.buffer()
         game.handle_events()
+        game.update()
         game.draw()
         game.draw_debug()
