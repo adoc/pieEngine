@@ -1,8 +1,8 @@
-import pygame
-import pygame.time
-from pygame.locals import *
+import time
 
-from ameiosis.game import CircleSprite, Ameosis
+import pygame
+
+from ameiosis.game_proto import Ameosis
 
 
 if __name__ == "__main__":
@@ -10,17 +10,13 @@ if __name__ == "__main__":
 
     clock = pygame.time.Clock()
     screen = pygame.display.set_mode((1024, 512))
-    font = pygame.font.Font(None, 20)
 
     game = Ameosis(screen, clock)
 
     while not game.done:
-        # Last to blit overlay(s).
-        text = font.render("FPS %d" % clock.get_fps(), 1, (240, 240, 240))
-        screen.blit(text, (8,8))
-
+        t1 = time.time()
         game.buffer()
         game.handle_events()
         game.update()
         game.draw()
-        game.draw_debug()
+        game.draw_debug(tick_time=time.time() - t1)

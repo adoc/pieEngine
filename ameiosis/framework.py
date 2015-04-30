@@ -1,3 +1,7 @@
+"""
+Game Framework.
+"""
+
 import pygame.sprite
 from pygame.locals import *
 
@@ -70,7 +74,7 @@ class Game(EventsMixin):
         EventsMixin.__init__(self)
         self._drag_handler = DragHandler()
         self._surface = surface
-        self.__clock = clock
+        self._clock = clock
         self.__done = False
         self.__target_fps = target_fps
 
@@ -81,7 +85,7 @@ class Game(EventsMixin):
         self.__background.fill(background_color)
 
         self._debug_font = pygame.font.Font(None, 18)
-        self._debug_pos = (8, 28)
+        self._debug_pos = (8, 8)
         self._debug_lines = []
 
     def ev_mouse_down(self, ev):
@@ -98,13 +102,19 @@ class Game(EventsMixin):
         if self.__mouse_left_down:
             self._drag_handler.move(*ev.pos)
 
-    def draw_debug(self):
+    def draw_debug(self, tick_time=0):
         for n, line in enumerate(self._debug_lines):
             pos = list(self._debug_pos)
             pos[1] = n * self._debug_font.get_linesize() + self._debug_pos[1]
             self._surface.blit(
                 self._debug_font.render(*line),
                 pos)
+        if tick_time:
+            pos[1] += self._debug_font.get_linesize() + self._debug_pos[1]
+            self._surface.blit(
+                self._debug_font.render("Tick: %.4f" % tick_time, 1, (240, 240, 240)),
+                pos
+            )
         self._debug_lines = []
 
     def update(self):
@@ -118,7 +128,7 @@ class Game(EventsMixin):
         return self.__done
 
     def buffer(self):
-        self.__clock.tick(60)
+        self._clock.tick(60)
         pygame.display.flip()
 
     def draw(self):

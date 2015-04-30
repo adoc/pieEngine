@@ -10,17 +10,16 @@ from lanchester.model.side import Engagement, Battalion, Faction
 
 if __name__ == "__main__":
     # Just some sides.
-    b1 = Battalion(1500, .01)
-    b2 = Battalion(700, .01)
-    b3 = Battalion(500, .01)
-    b4 = Battalion(300, .01)
+    b1 = Battalion(10000, .01)
+    #b2 = Battalion(10000, .01)
+    b2 = [Battalion(1000, .01) for _ in range(10)]
 
     # Now they have chosen sides.
     f1 = Faction('a', b1)
-    f2 = Faction('b', b2, b3, b4)
+    f2 = Faction('b', *b2)
 
     # The battle begins.
-    engagement = Engagement(b1, b2, b3, b4, alg=LanchesterSquareAllies())
+    engagement = Engagement(b1, *b2, alg=LanchesterSquareAllies())
 
     # Do the simulation and rotate the matrix for plotting.
     t1 = time.time()
