@@ -7,11 +7,12 @@ import pygame
 from pygame.locals import *
 
 from lanchester.model import LanchesterSquareAllies
-from lanchester.model.side import Engagement
+from lanchester.model.side import Faction, Engagement
 
 from ameiosis.framework import Game
 
 Engagement = partial(Engagement, alg=LanchesterSquareAllies())
+
 
 class BattleHandler:
     def __init__(self, armies):
@@ -30,7 +31,6 @@ class BattleHandler:
                                                    pygame.sprite.collide_circle)
                     )
 
-
         if self.__collisions:
             engaged = list(self.__collisions.keys())
             for val in self.__collisions.values():
@@ -43,10 +43,8 @@ class BattleHandler:
                                                     for army in engaged]))
 
         remove = []
-
         for engagement in self.__engagments:
             if not engagement.finished:
-
                 engagement.do_round()
 
             else:
@@ -58,15 +56,18 @@ class BattleHandler:
             self.__engagments.remove(engagement)
 
 
-
-
 class Ameosis(Game):
     def __init__(self, surface, clock, **kwa):
         super(Ameosis, self).__init__(surface, clock, **kwa)
         self._armies_sprites = defaultdict(pygame.sprite.Group)
-
-        self._simulate = False
+        self._armies_lanc_factions = defaultdict(self._make_faction)
+        self.__faction_count = 0
+        self._simulate_battle = False
         self.__battlehandler = BattleHandler(self._armies_sprites)
+
+    def _make_faction(self):
+        self.__faction_count += 1
+        return Faction(self.__faction_count)
 
     def ev_key_up(self, ev):
         super(Ameosis, self).ev_key_up(ev)
@@ -75,14 +76,15 @@ class Ameosis(Game):
 
     def update(self):
         super(Ameosis, self).update()
-        if self._simulate:
+        if self._simulate_battle:
             self.__battlehandler.update()
+
+        self._debug_lines.append(("ESC to exit.", 1, (240,240,240)))
+        self._debug_lines.append(("FPS %d" % self._clock.get_fps(), 1, (240, 240, 240)))
 
     def draw(self):
         super(Ameosis, self).draw()
-        #t1 = time.time()
         for team in self._armies_sprites.values():
             for obj in team:
                 obj.update()
                 obj.draw(self._surface)
-        #print(time.time() - t1)

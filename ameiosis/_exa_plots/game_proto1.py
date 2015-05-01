@@ -1,9 +1,11 @@
+import time
+
 from collections import defaultdict
 
 import pygame
 from pygame.locals import *
 
-from lanchester.model.side import Battalion, Faction
+from lanchester.model.side import Battalion
 
 from ameiosis.sprites import Army
 from ameiosis.game import Ameosis as AmeosisBase
@@ -14,14 +16,6 @@ class Ameosis(AmeosisBase):
         super(Ameosis, self).__init__(surface, clock, **kwa)
         self.__spawn_size = 1
         self.__spawn_team = 0
-
-        self.__faction_count = 0
-
-        self._armies_lanc_factions = defaultdict(self.__make_faction)
-
-    def __make_faction(self):
-        self.__faction_count += 1
-        return Faction(self.__faction_count)
 
     @property
     def spawn_size(self):
@@ -60,7 +54,7 @@ class Ameosis(AmeosisBase):
         elif ev.key == K_LEFT:
             self.spawn_team -= 1
         elif ev.key == K_SPACE:
-            self._simulate = not self._simulate
+            self._simulate_battle = not self._simulate_battle
 
     def ev_mouse_down(self, ev):
         super(Ameosis, self).ev_mouse_down(ev)
@@ -76,8 +70,23 @@ class Ameosis(AmeosisBase):
 
     def update(self):
         super(Ameosis, self).update()
-        self._debug_lines.append(("FPS %d" % self._clock.get_fps(), 1, (240, 240, 240)))
         self._debug_lines.append(("Size (up/down): %s" % (self.__spawn_size), 1, (240, 240, 240)))
         self._debug_lines.append(("Team (left/right): %s" % (self.__spawn_team), 1, (240, 240, 240)))
-        self._debug_lines.append(("Simulate (space): %s" % (self._simulate), 1, (240, 240, 240)))
-        self._debug_lines.append(("ESC to exit.", 1, (240,240,240)))
+        self._debug_lines.append(("Simulate (space): %s" % (self._simulate_battle), 1, (240, 240, 240)))
+
+
+if __name__ == "__main__":
+    pygame.init()
+
+    clock = pygame.time.Clock()
+    screen = pygame.display.set_mode((1024, 512))
+
+    game = Ameosis(screen, clock)
+
+    while not game.done:
+        t1 = time.time()
+        game.buffer()
+        game.handle_events()
+        game.update()
+        game.draw()
+        game.draw_debug(tick_time=time.time() - t1)

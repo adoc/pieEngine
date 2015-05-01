@@ -6,6 +6,18 @@ import pygame.sprite
 from pygame.locals import *
 
 
+USER_EVENT_1 = USEREVENT + 1
+USER_EVENT_2 = USEREVENT + 2
+USER_EVENT_3 = USEREVENT + 3
+USER_EVENT_4 = USEREVENT + 4
+USER_EVENT_5 = USEREVENT + 5
+USER_EVENT_6 = USEREVENT + 6
+USER_EVENT_7 = USEREVENT + 7
+USER_EVENT_8 = USEREVENT + 8
+USER_EVENT_9 = USEREVENT + 9
+USER_EVENT_10 = USEREVENT + 10
+
+
 class ClickPointSprite(pygame.sprite.Sprite):
     def __init__(self, x, y):
         self.rect = pygame.Rect((x, y), (1,1))
@@ -28,6 +40,12 @@ class EventsMixin:
     def ev_key_up(self, ev):
         pass
 
+    def ev_user_event_1(self, ev):
+        pass
+
+    def ev_user_event_2(self, ev):
+        pass
+
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -42,6 +60,10 @@ class EventsMixin:
                 self.ev_mouse_up(event)
             elif event.type == MOUSEMOTION:
                 self.ev_mouse_motion(event)
+            elif event.type == USER_EVENT_1:
+                self.ev_user_event_1(event)
+            elif event.type == USER_EVENT_2:
+                self.ev_user_event_2(event)
 
 
 class DragHandler(set):
@@ -103,7 +125,7 @@ class Game(EventsMixin):
             self._drag_handler.move(*ev.pos)
 
     def draw_debug(self, tick_time=0):
-        for n, line in enumerate(self._debug_lines):
+        for n, line in enumerate(reversed(self._debug_lines)):
             pos = list(self._debug_pos)
             pos[1] = n * self._debug_font.get_linesize() + self._debug_pos[1]
             self._surface.blit(
