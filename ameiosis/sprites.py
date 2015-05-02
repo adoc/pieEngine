@@ -2,11 +2,12 @@ import functools
 
 import pygame
 
-from ameiosis.framework import ClickPointSprite
+from ameiosis.engine.sprites import DragableSpriteMixin
 
 
-class CircleSprite(pygame.sprite.Sprite):
+class CircleSprite(pygame.sprite.Sprite, DragableSpriteMixin):
     def __init__(self, size, pos):
+        DragableSpriteMixin.__init__(self, *pos)
         pygame.sprite.Sprite.__init__(self)
         self.size = size
         self._size_mult = 10
@@ -18,14 +19,6 @@ class CircleSprite(pygame.sprite.Sprite):
                                 pos[1]-self._get_radius(),
                                 self._get_radius()*2, self._get_radius()*2)
         self.un_drag()
-
-    def un_drag(self):
-        self.dragging = False
-        self.drag_sprite = ClickPointSprite(*self._coord)
-
-    def drag(self, drag_sprite):
-        self.dragging = True
-        self.drag_sprite = drag_sprite
 
     @property
     def color(self):

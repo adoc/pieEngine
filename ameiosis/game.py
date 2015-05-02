@@ -9,7 +9,7 @@ from pygame.locals import *
 from lanchester.model import LanchesterSquareAllies
 from lanchester.model.side import Faction, Engagement
 
-from ameiosis.framework import Game
+from ameiosis.engine import Engine
 
 Engagement = partial(Engagement, alg=LanchesterSquareAllies())
 
@@ -56,7 +56,7 @@ class BattleHandler:
             self.__engagments.remove(engagement)
 
 
-class Ameosis(Game):
+class Ameosis(Engine):
     def __init__(self, surface, clock, **kwa):
         super(Ameosis, self).__init__(surface, clock, **kwa)
         self._armies_sprites = defaultdict(pygame.sprite.Group)
