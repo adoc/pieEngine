@@ -72,7 +72,7 @@ class Ameosis(Engine):
     def ev_key_up(self, ev):
         super(Ameosis, self).ev_key_up(ev)
         if ev.key == K_ESCAPE:
-            self.quit()
+            self.stop()
 
     def update(self):
         super(Ameosis, self).update()
@@ -87,4 +87,4 @@ class Ameosis(Engine):
         for team in self._armies_sprites.values():
             for obj in team:
                 obj.update()
-                obj.draw(self._surface)
+                self.draw_queue.append(obj.render)

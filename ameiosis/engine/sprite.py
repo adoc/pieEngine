@@ -29,8 +29,8 @@ class AnimatedSprite(pygame.sprite.Sprite):
     def reset(self):
         self._frame_index = 0
 
-    def draw(self, surface):
-       surface.blit(self.frame, self.rect.topleft)
+    def render(self):
+        return (self.frame, self.rect.topleft)
 
     def update(self):
         self.__animation_obj.update(self)

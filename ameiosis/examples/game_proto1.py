@@ -66,7 +66,7 @@ class Ameosis(AmeosisBase):
             self._armies_lanc_factions[self.__spawn_team].add_member(
                                                                 army.battalion)
             self._armies_sprites[self.__spawn_team].add(army)
-            self._drag_handler.add(army)
+            self.__drag_handler.add(army)
 
     def update(self):
         super(Ameosis, self).update()
