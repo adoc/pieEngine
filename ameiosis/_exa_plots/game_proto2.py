@@ -5,8 +5,8 @@ from pygame.locals import *
 
 from lanchester.model.side import Battalion, Faction
 
-from ameiosis.engine.events import USER_EVENT_1
-from ameiosis.sprites import Army
+from ameiosis.engine.event import USER_EVENT_1
+from ameiosis.sprite import Army
 from ameiosis.game import Ameosis as AmeosisBase
 
 

@@ -7,7 +7,7 @@ from pygame.locals import *
 
 from lanchester.model.side import Battalion
 
-from ameiosis.sprites import Army
+from ameiosis.sprite import Army
 from ameiosis.game import Ameosis as AmeosisBase
 
 

@@ -2,7 +2,7 @@ import functools
 
 import pygame
 
-from ameiosis.engine.sprites import DragableSpriteMixin
+from ameiosis.engine.sprite import DragableSpriteMixin
 
 
 class CircleSprite(pygame.sprite.Sprite, DragableSpriteMixin):

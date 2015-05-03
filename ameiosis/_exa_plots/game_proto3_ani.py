@@ -9,8 +9,8 @@ import random
 import pygame
 from pygame.locals import *
 
-from ameiosis.engine.sprites import AnimatedSprite
-from ameiosis.engine.events import USER_EVENT_1
+from ameiosis.engine.sprite import AnimatedSprite
+from ameiosis.engine.event import USER_EVENT_1
 from ameiosis.game import Ameosis as AmeosisBase
 
 

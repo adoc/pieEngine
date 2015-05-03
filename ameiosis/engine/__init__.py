@@ -5,10 +5,10 @@ Game Engine.
 import pygame.sprite
 from pygame.locals import *
 
-from ameiosis.engine.assets import AssetsMixin
-from ameiosis.engine.events import EventsMixin, DragHandler
-from ameiosis.engine.sprites import ClickPointSprite
-from ameiosis.engine.animations import AnimationLoop
+from ameiosis.engine.asset import AssetsMixin
+from ameiosis.engine.event import EventsMixin, DragHandler
+from ameiosis.engine.sprite import ClickPointSprite
+from ameiosis.engine.animation import AnimationLoop
 
 
 class Background(pygame.Surface):

@@ -1,7 +1,7 @@
 import pygame
 from pygame.locals import *
 
-from ameiosis.engine.sprites import ClickPointSprite
+from ameiosis.engine.sprite import ClickPointSprite
 
 
 # TODO We are only defining 10 user events, but we can abstract this to any number.
