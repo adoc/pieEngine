@@ -14,7 +14,6 @@ class CircleSprite(pygame.sprite.Sprite, DragableSpriteMixin):
 
         self.color_offset = 20
         self._color = (150, 150, 150)
-        self._coord = pos
         self.rect = pygame.Rect(pos[0]-self._get_radius(),
                                 pos[1]-self._get_radius(),
                                 self._get_radius()*2, self._get_radius()*2)
@@ -32,14 +31,6 @@ class CircleSprite(pygame.sprite.Sprite, DragableSpriteMixin):
         else:
             return self._color
 
-    @property
-    def coord(self):
-        return self._coord
-
-    @coord.setter
-    def coord(self, val):
-        self._coord = (int(val[0]), int(val[1]))
-
     def _get_radius(self):
         return self.size * self._size_mult
 
@@ -49,10 +40,10 @@ class CircleSprite(pygame.sprite.Sprite, DragableSpriteMixin):
 
     def update(self):
         if self.dragging:
-            self._coord = self.drag_sprite.rect.center
+            self.rect.center = self.drag_sprite.rect.center
 
     def draw(self, surface):
-        self.rect = pygame.draw.circle(surface, self.color, self.coord,
+        self.rect = pygame.draw.circle(surface, self.color, self.rect.center,
                                        self.radius)
 
 # This is a little hackish and could be refactored, but a pragmatic
@@ -93,10 +84,11 @@ class Army(CircleSprite):
                     (self.battalion.units/self.battalion._starting_units))
         return rad > 0 and rad or 1
 
-    @property
-    def coord(self):
-        x, y = self.vector.lerp(self._coord, self.interpolation)
-        return (int(x), int(y))
+    # TODO: Adjust this to work with rect since ``coord`` and ``_coord`` were removed.
+    # @property
+    # def coord(self):
+    #     x, y = self.vector.lerp(self._coord, self.interpolation)
+    #     return (int(x), int(y))
 
     @property
     def interpolation(self):

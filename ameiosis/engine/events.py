@@ -1,7 +1,10 @@
 import pygame
 from pygame.locals import *
 
+from ameiosis.engine.sprites import ClickPointSprite
 
+
+# TODO We are only defining 10 user events, but we can abstract this to any number.
 USER_EVENT_1 = USEREVENT + 1
 USER_EVENT_2 = USEREVENT + 2
 USER_EVENT_3 = USEREVENT + 3
@@ -14,13 +17,10 @@ USER_EVENT_9 = USEREVENT + 9
 USER_EVENT_10 = USEREVENT + 10
 
 
-class ClickPointSprite(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        self.rect = pygame.Rect((x, y), (1,1))
-        self.radius = 1
-
-
 class EventsMixin:
+    def ev_resize(self, ev):
+        pass
+
     def ev_mouse_down(self, ev):
         pass
 
@@ -70,6 +70,8 @@ class EventsMixin:
         for event in pygame.event.get():
             if event.type == QUIT:
                 self.quit()
+            elif event.type == VIDEORESIZE:
+                self.ev_resize(event)
             elif event.type == KEYDOWN:
                 self.ev_key_down(event)
             elif event.type == KEYUP:

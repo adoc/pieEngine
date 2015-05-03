@@ -21,7 +21,7 @@ class Ameosis(AmeosisBase):
         self.__spawn_team = 0
         # self._margin_lines = 80
         self._teams_spawn_ts = {}
-        pygame.time.set_timer(USER_EVENT_1, 2000)
+        pygame.time.set_timer(USER_EVENT_1, 20)
 
     @property
     def spawn_size(self):
@@ -89,7 +89,13 @@ class Ameosis(AmeosisBase):
 if __name__ == "__main__":
     pygame.init()
 
-    screen = pygame.display.set_mode((1024, 512))
+    screen = pygame.display.set_mode((1024, 512), DOUBLEBUF | ASYNCBLIT | RESIZABLE)
+    # screen = screen.convert_alpha()
+
+    import pprint
+    pprint.pprint(pygame.display.Info())
+
+
     clock = pygame.time.Clock()
     game = Ameosis(screen, clock)
 

@@ -1,6 +1,12 @@
 import pygame
 
-from ameiosis.engine import AnimationLoop, ClickPointSprite
+from ameiosis.engine.animations import AnimationLoop
+
+
+class ClickPointSprite(pygame.sprite.Sprite):
+    def __init__(self, x, y, radius=1):
+        self.rect = pygame.Rect((x, y), (1,1))
+        self.radius = radius
 
 
 class AnimatedSprite(pygame.sprite.Sprite):
@@ -46,6 +52,9 @@ class AnimatedSpriteCluster:
 
 
 class DragableSpriteMixin:
+    """ Allows a sprite to be dragged.
+    Game class must implement ``engine.events.Draghandler``.
+    """
     def __init__(self, *args, **kwa):
         self.__dragging = False
         self.__drag_sprite = ClickPointSprite(0, 0)
@@ -53,6 +62,10 @@ class DragableSpriteMixin:
     @property
     def dragging(self):
         return self.__dragging
+
+    @property
+    def drag_sprite(self):
+        return self.__drag_sprite
 
     def un_drag(self):
         self.__dragging = False
