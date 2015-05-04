@@ -92,6 +92,13 @@ class SurfaceEntity(BaseEntity):
     def surface(self):
         return self.__surface
 
+    @property
+    def image(self):
+        """Synonym to enable mixing with ``pygame.sprite.Sprite``
+        """
+        # TODO: This assumes subclassing Sprite. Determine if we subclass or compose it.
+        return self.__surface
+
     def surface_reset(self, *surface_args, surface_factory=None):
         self.__surface = (callable(surface_factory) and surface_factory() or
                           pygame.Surface(*surface_args))
@@ -116,6 +123,46 @@ class SurfaceRectEntity(RectEntity, SurfaceEntity):
 
     def present(self):
         return (self.surface, self.rect)
+
+
+# Composition. Fail??
+class SurfaceRectSpriteEntity(SurfaceRectEntity):
+    def __init__(self, *surface_args, surface_factory=None,
+                 sprite_factory=None, **surface_rect_kwa):
+        BaseEntity.__init__(self)
+        self.sprite_reset(*surface_args, surface_factory=surface_factory,
+                 sprite_factory=sprite_factory, **surface_rect_kwa)
+
+    def sprite_reset(self, *surface_args, surface_factory=None,
+             sprite_factory=None, sprite_rect_factory=None, **surface_rect_kwa):
+        SurfaceRectEntity.surface_reset(*surface_args,
+                                        surface_factory=surface_factory,
+                                        **surface_rect_kwa)
+        self.__sprite = sprite_factory()
+        self.__sprite.rect = (callable(sprite_rect_factory) and
+                              sprite_rect_factory() or self.rect)
+        self.__sprite.image = self.surface
+
+    @property
+    def sprite(self):
+        return self.__sprite
+
+    def present(self):
+        return (self.surface, self.rect, self.sprite)
+
+
+# Inheritance. ??
+def make_sprite_entity_cls(cls=pygame.sprite.Sprite):
+    """
+    This allows for use of of pygame.sprite.DirtySprite as well.
+    """
+
+    class SpriteEntity(cls, SurfaceRectEntity):
+        def __init__(self, *groups, **surface_rect_kwa):
+            cls.__init__(self, *groups)
+            SurfaceRectEntity.__init__(**surface_rect_kwa)
+
+    return SpriteEntity
 
 
 class FillEntity(SurfaceRectEntity):
