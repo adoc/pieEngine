@@ -87,4 +87,4 @@ class Ameosis(Engine):
         for team in self._armies_sprites.values():
             for obj in team:
                 obj.update()
-                self.draw_queue.append(obj.render)
+                self.add_draw(obj.render)

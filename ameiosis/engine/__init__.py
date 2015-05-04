@@ -6,7 +6,7 @@ import pygame.sprite
 from pygame.locals import *
 
 from ameiosis.engine.asset import AssetsMixin
-from ameiosis.engine.event import EventsMixin, DragHandler
+from ameiosis.engine.event import DragHandler
 from ameiosis.engine.sprite import ClickPointSprite
 from ameiosis.engine.animation import AnimationLoop
 
@@ -37,7 +37,7 @@ class Background:
 
 
 # TODO: Abstract out debug.
-class Engine(EventsMixin, AssetsMixin):
+class Engine(AssetsMixin):
     """Game enging base class. Any game implementations will subclass
     from this.
     """
@@ -52,7 +52,6 @@ class Engine(EventsMixin, AssetsMixin):
         :return:
         """
         AssetsMixin.__init__(self)
-        EventsMixin.__init__(self)
 
         self.__target_fps = target_fps
 
@@ -60,7 +59,6 @@ class Engine(EventsMixin, AssetsMixin):
             self.__background = Background(surface)
         else:
             self.__background = background
-
 
         self.__draw_surface = pygame.Surface(surface.get_size(), SRCALPHA)
         self.__draw_surface = self.__draw_surface.convert_alpha()
@@ -72,7 +70,6 @@ class Engine(EventsMixin, AssetsMixin):
         self.__drag_handler = DragHandler()
 
         self.__draw_queue = []
-        self.__render_queue = []
 
         # Bind events.
         self.bind(QUIT, self.stop)
@@ -92,10 +89,6 @@ class Engine(EventsMixin, AssetsMixin):
     @property
     def draw_surface(self):
         return self.__draw_surface
-
-    @property
-    def draw_queue(self):
-        return self.__draw_queue
 
     def __ev_resize(self, event, **_):
         new_size = event.dict['size']
@@ -149,8 +142,8 @@ class Engine(EventsMixin, AssetsMixin):
         pygame.display.flip()
 
     def draw(self):
-        self.__draw_queue.append(self.__background.render)
-        self.__draw_queue.append(lambda: (self.__draw_surface, (0,0)))
+        self.add_draw(self.__background.render)
+        self.add_draw(lambda: (self.__draw_surface, (0,0)))
 
     def render(self):
         for draw in self.__draw_queue:

@@ -5,27 +5,21 @@ from collections import defaultdict
 import pygame
 from pygame.locals import *
 
+from ameiosis.engine.util import OrderedDefaultDict
+
 from ameiosis.engine.sprite import ClickPointSprite
 
 
-class EventsMixin:
-    """Engine mixin class providing Event functionality.
-    """
-    def __init__(self):
-        """Initializes the EventsMixin and sets up some default
-        bindings.
-        """
+class MouseState:
+    def __init__(self, engine):
+        self.__engine = engine
         self.__mouse_button_state = [None] * 8
         self.__mouse_pos_state = (None,) * 2
 
-        self.__event_binds = defaultdict(list)
-        self.__event_user_binds = defaultdict(lambda: 0)
-        self.__user_bind_index = 0
-
         # Set up default event bindings.
-        self.bind(MOUSEBUTTONDOWN, self.ev_mouse_down)
-        self.bind(MOUSEBUTTONUP, self.ev_mouse_up)
-        self.bind(MOUSEMOTION, self.ev_mouse_motion)
+        engine.event.bind(MOUSEBUTTONDOWN, self.ev_mouse_down)
+        engine.event.bind(MOUSEBUTTONUP, self.ev_mouse_up)
+        engine.event.bind(MOUSEMOTION, self.ev_mouse_motion)
 
     @property
     def mouse_button_state(self):
@@ -50,6 +44,18 @@ class EventsMixin:
     def ev_mouse_motion(self, ev, **kwa):
         self.__mouse_pos_state = ev.pos
 
+
+class EventHandler:
+    """EventHandler class providing Event bindings and user events.
+    """
+    def __init__(self):
+        """Initializes the EventsMixin and sets up some default
+        bindings.
+        """
+        self.__event_binds = OrderedDefaultDict(list)
+        self.__event_user_binds = OrderedDefaultDict(lambda: 0)
+        self.__user_bind_index = 0
+
     def bind(self, event_const, func):
         """Bind a function a an event. (FIFO stack)
         :param pygame.*EVENT event_const: Event to bind the function to
@@ -57,13 +63,13 @@ class EventsMixin:
         """
         self.__event_binds[event_const].append(func)
 
-    def set_next_user_event(self, name):
+    def __set_next_user_event(self, name):
         self.__user_bind_index += 1
         user_event = USEREVENT + self.__user_bind_index
         self.__event_user_binds[name] = user_event
         return user_event
 
-    def bind_named(self, name, func):
+    def bind_user(self, name, func):
         """
 
         :param name:
@@ -74,7 +80,7 @@ class EventsMixin:
         if user_event:
             self.bind(user_event, func)
         else:
-            self.bind(self.set_next_user_event(name), func)
+            self.bind(self.__set_next_user_event(name), func)
 
         return user_event
 
@@ -87,7 +93,7 @@ class EventsMixin:
         """
         self.__event_binds[event_const].remove(func)
 
-    def unbind_named(self, name, func):
+    def unbind_user(self, name, func):
         """
 
         :param name:
