@@ -8,7 +8,7 @@ import pygame
 from ameiosis.engine import entities
 from ameiosis.engine.entities import (next_entity_ord, BaseEntity, RectEntity,
                                       SurfaceEntity, SurfaceRectEntity,
-                                      FillEntity)
+                                      FillSurfaceEntity)
 
 
 class TestModuleFuncs(unittest.TestCase):
@@ -101,16 +101,16 @@ class TestRectEntity(TestRectBase):
             self.assertEqual(r1.rect, pr)
 
             # no arg.
-            self.assertRaises(TypeError, r1.rect_reset)
+            self.assertRaises(TypeError, r1.reset)
 
             # single arg (Rect)
-            r1.rect_reset(pr_r)
+            r1.reset(pr_r)
             self.assertIsInstance(r1.rect, pygame.Rect)
             self.assertIsNot(r1.rect, pr_r)
             self.assertEqual(r1.rect, pr_r)
 
             # two args (topleft), (size)
-            r1.rect_reset(pr.topleft,
+            r1.reset(pr.topleft,
                           pr.size)
             self.assertIsInstance(r1.rect, pygame.Rect)
             self.assertIsNot(r1.rect, pr)
@@ -118,21 +118,21 @@ class TestRectEntity(TestRectBase):
 
             # two bad args
             self.assertRaises(TypeError,
-                              lambda: r1.rect_reset(pr.left,
+                              lambda: r1.reset(pr.left,
                                                     pr.top))
 
             # three bad args
             self.assertRaises(TypeError,
-                              lambda: r1.rect_reset(*pr.topleft + (pr.width,)))
+                              lambda: r1.reset(*pr.topleft + (pr.width,)))
             
             # four args
-            r1.rect_reset(pr_r.left, pr_r.top, pr_r.width, pr_r.height)
+            r1.reset(pr_r.left, pr_r.top, pr_r.width, pr_r.height)
             self.assertIsInstance(r1.rect, pygame.Rect)
             self.assertIsNot(r1.rect, pr_r)
             self.assertEqual(r1.rect, pr_r)
 
             # rect_factory
-            r1.rect_reset(rect_factory=self._rect_factory)
+            r1.reset(rect_factory=self._rect_factory)
             self.assertIsInstance(r1.rect, pygame.Rect)
             self.assertGreaterEqual(r1.rect.top, 0)
             self.assertLessEqual(r1.rect.top, 1000)
@@ -179,20 +179,20 @@ class TestSurfaceEntity(TestRectBase):
             s = SurfaceEntity(pr.size)
 
             # no arg.
-            self.assertRaises(TypeError, s.surface_reset)
+            self.assertRaises(TypeError, s.reset)
 
             # one arg
-            s.surface_reset(pr_r.size)
+            s.reset(pr_r.size)
             self.assertEqual(s.surface.get_size(), pr_r.size)
 
             # two args
-            s.surface_reset(pr.size, 0)
+            s.reset(pr.size, 0)
             self.assertEqual(s.surface.get_flags(), 0)
-            s.surface_reset(pr.size, pygame.SRCALPHA)
+            s.reset(pr.size, pygame.SRCALPHA)
             self.assertEqual(s.surface.get_flags(), pygame.SRCALPHA)
 
             # three args
-            s.surface_reset(pr_r.size, 0, 8)
+            s.reset(pr_r.size, 0, 8)
             self.assertEqual(s.surface.get_bitsize(), 8)
             s = SurfaceEntity(pr_r.size, 0, 16)
             self.assertEqual(s.surface.get_bitsize(), 16)
@@ -202,7 +202,7 @@ class TestSurfaceEntity(TestRectBase):
             self.assertEqual(s.surface.get_bitsize(), 32)
 
             # surface factory
-            s.surface_reset(surface_factory=
+            s.reset(surface_factory=
                               lambda: pygame.Surface(pr.size))
             self.assertEqual(s.surface.get_size(), pr.size)
 
@@ -263,7 +263,7 @@ class TestSurfaceRectEntity(TestRectBase):
             self.assertEqual(s.surface.get_flags(), pygame.SRCALPHA)
             
             # three args
-            s.surface_reset(pr_r.size, 0, 8)
+            s.reset(pr_r.size, 0, 8)
             self.assertEqual(s.surface.get_bitsize(), 8)
             s = SurfaceRectEntity(pr_r.size, 0, 16)
             self.assertEqual(s.surface.get_bitsize(), 16)
@@ -289,40 +289,40 @@ class TestSurfaceRectEntity(TestRectBase):
             # one arg
             s = SurfaceRectEntity(pr.size)
             
-            s.surface_reset(pr_r.size)
+            s.reset(pr_r.size)
             self.assertEqual(s.surface.get_size(), pr_r.size)
             self.assertIsNot(s.rect, pr_r)
             self.assertEqual(s.rect.size, pr_r.size)
 
             # one arg (rect_kwa)
-            s.surface_reset(pr.size, center=pr.center)
+            s.reset(pr.size, center=pr.center)
             self.assertEqual(s.surface.get_size(), pr.size)
             self.assertIsNot(s.rect, pr)
             self.assertEqual(s.rect, pr)
 
-            s.surface_reset(pr_r.size, topleft=pr_r.topleft)
+            s.reset(pr_r.size, topleft=pr_r.topleft)
             self.assertEqual(s.surface.get_size(), pr_r.size)
             self.assertIsNot(s.rect, pr_r)
             self.assertEqual(s.rect, pr_r)
 
             # two args
-            s.surface_reset(pr.size, 0)
+            s.reset(pr.size, 0)
             self.assertEqual(s.surface.get_flags(), 0)
-            s.surface_reset(pr.size, pygame.SRCALPHA)
+            s.reset(pr.size, pygame.SRCALPHA)
             self.assertEqual(s.surface.get_flags(), pygame.SRCALPHA)
             
             # three args
-            s.surface_reset(pr_r.size, 0, 8)
+            s.reset(pr_r.size, 0, 8)
             self.assertEqual(s.surface.get_bitsize(), 8)
-            s.surface_reset(pr_r.size, 0, 16)
+            s.reset(pr_r.size, 0, 16)
             self.assertEqual(s.surface.get_bitsize(), 16)
-            s.surface_reset(pr_r.size, 0, 24)
+            s.reset(pr_r.size, 0, 24)
             self.assertEqual(s.surface.get_bitsize(), 24)
-            s.surface_reset(pr_r.size, 0, 32)
+            s.reset(pr_r.size, 0, 32)
             self.assertEqual(s.surface.get_bitsize(), 32)
 
             # surface factory
-            s.surface_reset(surface_factory=
+            s.reset(surface_factory=
                                     lambda: pygame.Surface(pr.size),
                                   center=pr.center)
             self.assertEqual(s.surface.get_size(), pr.size)
@@ -342,12 +342,10 @@ class TestFillEntity(TestRectBase):
         pass
 
     def test_update(self):
-        s = FillEntity((100,100), 0, 24)
-        s.update()
+        s = FillSurfaceEntity((100,100), 0, 24)
         for byte in s.surface.get_buffer().raw:
             self.assertEqual(byte, 0)
 
-        s = FillEntity((100,100), 0, 24, fill_color=(255,255,255))
-        s.update()
+        s = FillSurfaceEntity((100,100), 0, 24, fill_color=(255,255,255))
         for byte in s.surface.get_buffer().raw:
             self.assertEqual(byte, 255)

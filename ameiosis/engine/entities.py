@@ -3,7 +3,8 @@ import uuid
 import pygame
 
 
-__all__ = ('next_entity_ord', 'EntityBase', 'RectEntity', 'SurfaceEntity')
+# TODO: Needs to be updated, otherwise we need to allow ALL.
+#__all__ = ('next_entity_ord', 'EntityBase', 'RectEntity', 'SurfaceEntity')
 
 
 __entity_ord = 0
@@ -57,6 +58,9 @@ class BaseEntity:
     def id(self):
         return self.__uuid.int
 
+    def update(self):
+        raise NotImplementedError("Entity ``update`` method is not implemented.")
+
 
 class RectEntity(BaseEntity):
     """
@@ -64,13 +68,13 @@ class RectEntity(BaseEntity):
 
     def __init__(self, *rect_args, rect_factory=None):
         super(RectEntity, self).__init__()
-        self.rect_reset(*rect_args, rect_factory=rect_factory)
+        self.reset(*rect_args, rect_factory=rect_factory)
 
     @property
     def rect(self):
         return self.__rect
 
-    def rect_reset(self, *rect_args, rect_factory=None):
+    def reset(self, *rect_args, rect_factory=None):
         self.__rect = (callable(rect_factory) and rect_factory() or
                        pygame.Rect(*rect_args))
 
@@ -86,7 +90,7 @@ class SurfaceEntity(BaseEntity):
         :return:
         """
         BaseEntity.__init__(self)
-        self.surface_reset(*surface_args, surface_factory=surface_factory)
+        self.reset(*surface_args, surface_factory=surface_factory)
 
     @property
     def surface(self):
@@ -99,7 +103,7 @@ class SurfaceEntity(BaseEntity):
         # TODO: This assumes subclassing Sprite. Determine if we subclass or compose it.
         return self.__surface
 
-    def surface_reset(self, *surface_args, surface_factory=None):
+    def reset(self, *surface_args, surface_factory=None):
         self.__surface = (callable(surface_factory) and surface_factory() or
                           pygame.Surface(*surface_args))
 
@@ -113,66 +117,55 @@ class SurfaceEntity(BaseEntity):
 class SurfaceRectEntity(RectEntity, SurfaceEntity):
     def __init__(self, *surface_args, surface_factory=None, **rect_kwa):
         BaseEntity.__init__(self)
-        self.surface_reset(*surface_args,
+        self.reset(*surface_args,
                                surface_factory=surface_factory, **rect_kwa)
 
-    def surface_reset(self, *surface_args, surface_factory=None, **rect_kwa):
-        SurfaceEntity.surface_reset(self, *surface_args,
+    def reset(self, *surface_args, surface_factory=None, **rect_kwa):
+        SurfaceEntity.reset(self, *surface_args,
                                     surface_factory=surface_factory)
-        self.rect_reset(self.surface.get_rect(**rect_kwa))
+        RectEntity.reset(self, self.surface.get_rect(**rect_kwa))
 
     def present(self):
         return (self.surface, self.rect)
 
 
-# Composition. Fail??
-class SurfaceRectSpriteEntity(SurfaceRectEntity):
+class SpriteEntity(pygame.sprite.Sprite, SurfaceRectEntity):
     def __init__(self, *surface_args, surface_factory=None,
-                 sprite_factory=None, **surface_rect_kwa):
+                 sprite_groups=[], **surface_rect_kwa):
         BaseEntity.__init__(self)
-        self.sprite_reset(*surface_args, surface_factory=surface_factory,
-                 sprite_factory=sprite_factory, **surface_rect_kwa)
-
-    def sprite_reset(self, *surface_args, surface_factory=None,
-             sprite_factory=None, sprite_rect_factory=None, **surface_rect_kwa):
-        SurfaceRectEntity.surface_reset(*surface_args,
+        pygame.sprite.Sprite.__init__(*sprite_groups)
+        SurfaceRectEntity.reset(*surface_args,
                                         surface_factory=surface_factory,
                                         **surface_rect_kwa)
-        self.__sprite = sprite_factory()
-        self.__sprite.rect = (callable(sprite_rect_factory) and
-                              sprite_rect_factory() or self.rect)
-        self.__sprite.image = self.surface
-
-    @property
-    def sprite(self):
-        return self.__sprite
-
-    def present(self):
-        return (self.surface, self.rect, self.sprite)
 
 
-# Inheritance. ??
-def make_sprite_entity_cls(cls=pygame.sprite.Sprite):
-    """
-    This allows for use of of pygame.sprite.DirtySprite as well.
-    """
-
-    class SpriteEntity(cls, SurfaceRectEntity):
-        def __init__(self, *groups, **surface_rect_kwa):
-            cls.__init__(self, *groups)
-            SurfaceRectEntity.__init__(**surface_rect_kwa)
-
-    return SpriteEntity
+class DirtySpriteEntity(pygame.sprite.DirtySprite, SurfaceRectEntity):
+    def __init__(self, *surface_args, surface_factory=None,
+                 sprite_groups=[], **surface_rect_kwa):
+        BaseEntity.__init__(self)
+        pygame.sprite.DirtySprite.__init__(*sprite_groups)
+        SurfaceRectEntity.reset(*surface_args,
+                                        surface_factory=surface_factory,
+                                        **surface_rect_kwa)
 
 
-class FillEntity(SurfaceRectEntity):
-    """
+class FillSurfaceEntity(SurfaceRectEntity):
+    """A static solid color surface.
     """
     def __init__(self, *surface_args, surface_factory=None,
                  fill_color=pygame.Color(0, 0, 0), **rect_kwa):
-        SurfaceRectEntity.__init__(self, *surface_args,
-                                   surface_factory=surface_factory, **rect_kwa)
-        self.__fill_color = fill_color
+        self.reset(*surface_args, surface_factory=surface_factory,
+                   fill_color=fill_color, **rect_kwa)
 
-    def update(self):
+    def reset(self, *surface_args, surface_factory=None,
+              fill_color=pygame.Color(0, 0, 0), **rect_kwa):
+        SurfaceRectEntity.reset(self, *surface_args,
+                                surface_factory=surface_factory, **rect_kwa)
+        self.__fill_color = fill_color
         self.surface.fill(self.__fill_color)
+
+
+class DrawSurfaceEntity(SurfaceRectEntity):
+    """A surface used generally for drawing.
+    """
+    pass

@@ -63,13 +63,13 @@ class Ameosis(AmeosisBase):
     def draw(self):
         super(Ameosis, self).draw()
         # Draw margin lines.
-        width, height = self._surface.get_size()
-        pygame.draw.circle(self._surface, (120,120,120),
+        width, height = self.__screen.get_size()
+        pygame.draw.circle(self.__screen, (120,120,120),
                             (width//2, height//2), height//4, 1)
 
-        # pygame.draw.line(self._surface, (120,120,120),
+        # pygame.draw.line(self.__screen, (120,120,120),
         #     (self._margin_lines, 0), (self._margin_lines, height))
-        # pygame.draw.line(self._surface, (120,120,120),
+        # pygame.draw.line(self.__screen, (120,120,120),
         #     (width-self._margin_lines, 0), (width-self._margin_lines, height))
 
 

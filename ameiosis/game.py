@@ -57,8 +57,8 @@ class BattleHandler:
 
 
 class Ameosis(Engine):
-    def __init__(self, surface, clock, **kwa):
-        super(Ameosis, self).__init__(surface, clock, **kwa)
+    def __init__(self, screen, clock, **kwa):
+        super(Ameosis, self).__init__(screen, clock, **kwa)
         self._armies_sprites = defaultdict(pygame.sprite.Group)
         self._armies_lanc_factions = defaultdict(self._make_faction)
         self.__faction_count = 0
@@ -80,11 +80,10 @@ class Ameosis(Engine):
             self.__battlehandler.update()
 
         self._debug_lines.append(("ESC to exit.", 1, (240,240,240)))
-        self._debug_lines.append(("FPS %d" % self._clock.get_fps(), 1, (240, 240, 240)))
 
     def draw(self):
         super(Ameosis, self).draw()
         for team in self._armies_sprites.values():
             for obj in team:
                 obj.update()
-                self.add_draw(obj.render)
+                self.append_blit(obj.render)

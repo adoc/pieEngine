@@ -11,15 +11,15 @@ from ameiosis.engine.sprite import ClickPointSprite
 
 
 class MouseState:
-    def __init__(self, engine):
-        self.__engine = engine
+    def __init__(self, event_handler):
+        self.__event_handler = event_handler
         self.__mouse_button_state = [None] * 8
         self.__mouse_pos_state = (None,) * 2
 
         # Set up default event bindings.
-        engine.event.bind(MOUSEBUTTONDOWN, self.ev_mouse_down)
-        engine.event.bind(MOUSEBUTTONUP, self.ev_mouse_up)
-        engine.event.bind(MOUSEMOTION, self.ev_mouse_motion)
+        event_handler.bind(MOUSEBUTTONDOWN, self.ev_mouse_down)
+        event_handler.bind(MOUSEBUTTONUP, self.ev_mouse_up)
+        event_handler.bind(MOUSEMOTION, self.ev_mouse_motion)
 
     @property
     def mouse_button_state(self):
@@ -48,10 +48,11 @@ class MouseState:
 class EventHandler:
     """EventHandler class providing Event bindings and user events.
     """
-    def __init__(self):
+    def __init__(self, engine):
         """Initializes the EventsMixin and sets up some default
         bindings.
         """
+        self.__engine = engine
         self.__event_binds = OrderedDefaultDict(list)
         self.__event_user_binds = OrderedDefaultDict(lambda: 0)
         self.__user_bind_index = 0
@@ -63,7 +64,7 @@ class EventHandler:
         """
         self.__event_binds[event_const].append(func)
 
-    def __set_next_user_event(self, name):
+    def set_next_user_event(self, name):
         self.__user_bind_index += 1
         user_event = USEREVENT + self.__user_bind_index
         self.__event_user_binds[name] = user_event
@@ -80,7 +81,7 @@ class EventHandler:
         if user_event:
             self.bind(user_event, func)
         else:
-            self.bind(self.__set_next_user_event(name), func)
+            self.bind(self.set_next_user_event(name), func)
 
         return user_event
 
@@ -111,7 +112,7 @@ class EventHandler:
         # TODO: We might need to use an ordered dict for __event_binds
         for event in pygame.event.get(list(self.__event_binds.keys())):
                 for callback in self.__event_binds[event.type]:
-                    callback(event, engine=self)
+                    callback(event, engine=self.__engine)
         pygame.event.clear()
 
 
@@ -126,7 +127,7 @@ class DragHandler(set):
                 yield sprite
 
     def ev_mouse_down(self, ev, **kwa):
-        self.__click_sprite = ClickPointSprite(ev.pos.x, ev.pos.y)
+        self.__click_sprite = ClickPointSprite(ev.pos[0], ev.pos[1])
         for sprite in self:
             if pygame.sprite.collide_circle(self.__click_sprite, sprite):
                 sprite.drag(self.__click_sprite)
@@ -136,7 +137,7 @@ class DragHandler(set):
             sprite.un_drag()
 
     def ev_mouse_motion(self, ev, engine=None):
-        if engine.mouse_button_state[0] is True:
+        if engine.mouse.mouse_button_state[0] is True:
             self.__click_sprite.rect.center = (x, y)
 
     # # Deprecated

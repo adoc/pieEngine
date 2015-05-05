@@ -20,8 +20,8 @@ class Ameosis(AmeosisBase):
         self.__spawn_team = 0
         self._teams_spawn_ts = {}
 
-        pygame.time.set_timer(self.set_next_user_event('ev_spawn_thing'), 10)
-        self.bind_named('ev_spawn_thing', self.ev_spawn_thing)
+        pygame.time.set_timer(self.event.set_next_user_event('ev_spawn_thing'), 10)
+        self.event.bind_user('ev_spawn_thing', self.ev_spawn_thing)
 
     @property
     def spawn_size(self):
@@ -49,11 +49,11 @@ class Ameosis(AmeosisBase):
             self.__spawn_team %= 2
 
     def ev_spawn_thing(self, ev, **kwa):
-        pos = (random.random()*self._surface.get_width()-20,
-               random.random()*self._surface.get_height()-20)
+        pos = (random.random()*self.screen_width-20,
+               random.random()*self.screen_height-20)
 
-        spr = AnimatedSprite(self.animations['bomber1'], pos,
-                             self.get_largest_frame('bomber1').get_size())
+        spr = AnimatedSprite(self.assets.animations['bomber1'], pos,
+                             self.assets.animations.get_largest_frame('bomber1').get_size())
 
         team = self.spawn_team
         self._armies_sprites[team].add(spr)
@@ -74,14 +74,13 @@ if __name__ == "__main__":
     clock = pygame.time.Clock()
     game = Ameosis(screen, clock)
 
-    game.init_animation('bomber1', "C:\\Users\\coda\\PycharmProjects\\"
+    game.assets.animations.add_from_zip('bomber1', "C:\\Users\\coda\\PycharmProjects\\"
                                    "Lanchester_Play\\src\\pyameiosis\\"
                                    "assets\\bomber1.zip", size=(64,64))
 
     while not game.stopped:
         t1 = time.time()
         game.buffer()
-        game.handle_events()
         game.update()
         game.draw()
         game.render()

@@ -83,10 +83,12 @@ if __name__ == "__main__":
 
     game = Ameosis(screen, clock)
 
-    while not game.done:
+    while not game.stopped:
         t1 = time.time()
         game.buffer()
-        game.handle_events()
         game.update()
         game.draw()
+        game.render()
+
+        # Will be refactored.
         game.draw_debug(tick_time=time.time() - t1)
