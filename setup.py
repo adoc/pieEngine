@@ -1,12 +1,12 @@
 from setuptools import setup
 
 setup(
-    name='ameiosis',
-    version='0.0.1',
-    packages=[],
-    url='',
-    license='',
-    author='coda',
-    author_email='',
-    description=''
+    name='pieEngine',
+    version='0.1.0',
+    packages=['pie'],
+    url='https://github.com/adoc/pieEngine',
+    license='MIT',
+    author='Nick Long',
+    author_email='adoc@code.webmob.net',
+    description='Game engine for Pygame.'
 )

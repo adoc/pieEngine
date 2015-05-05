@@ -1,8 +1,7 @@
-import time
 import pygame
 from pygame.locals import *
 
-from ameiosis.engine.entities import FillSurfaceEntity
+from pie.entities import FillSurfaceEntity
 
 
 if __name__ == "__main__":

@@ -1,5 +1,3 @@
-import time
-
 from functools import partial
 from collections import defaultdict
 
@@ -8,8 +6,8 @@ from pygame.locals import *
 
 from lanchester.model import LanchesterSquareAllies
 from lanchester.model.side import Faction, Engagement
+from pie.engine import Engine
 
-from ameiosis.engine import Engine
 
 Engagement = partial(Engagement, alg=LanchesterSquareAllies())
 

@@ -5,8 +5,8 @@ random = SystemRandom()
 
 import pygame
 
-from ameiosis.engine import entities
-from ameiosis.engine.entities import (next_entity_ord, BaseEntity, RectEntity,
+from pie import entities
+from pie.entities import (next_entity_ord, BaseEntity, RectEntity,
                                       SurfaceEntity, SurfaceRectEntity,
                                       FillSurfaceEntity)
 

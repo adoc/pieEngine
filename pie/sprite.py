@@ -1,6 +1,6 @@
 import pygame
 
-from ameiosis.engine.animation import AnimationLoop
+from pie.animation import AnimationLoop
 
 
 class ClickPointSprite(pygame.sprite.Sprite):

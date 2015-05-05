@@ -1,12 +1,14 @@
+"""
+Demonstrates asset loading and animation.
+"""
+
 import time
+import random
 
 import pygame
 from pygame.locals import *
 
-from lanchester.model.side import Battalion, Faction
-
-from ameiosis.engine.event import USER_EVENT_1
-from ameiosis.sprite import Army
+from pie.sprite import AnimatedSprite
 from ameiosis.game import Ameosis as AmeosisBase
 
 
@@ -15,9 +17,10 @@ class Ameosis(AmeosisBase):
         super(Ameosis, self).__init__(surface, clock, **kwa)
         self.__spawn_size = 3
         self.__spawn_team = 0
-        # self._margin_lines = 80
         self._teams_spawn_ts = {}
-        pygame.time.set_timer(USER_EVENT_1, 5000)
+
+        pygame.time.set_timer(self.event.set_next_user_event('ev_spawn_thing'), 10)
+        self.event.bind_user('ev_spawn_thing', self.ev_spawn_thing)
 
     @property
     def spawn_size(self):
@@ -33,6 +36,10 @@ class Ameosis(AmeosisBase):
             self.__spawn_size = val
 
     @property
+    def stopped(self):
+        return super(Ameosis, self).stopped or len(self._armies_sprites[0]) > 1000
+
+    @property
     def spawn_team(self):
         try:
             return self.__spawn_team
@@ -40,19 +47,16 @@ class Ameosis(AmeosisBase):
             self.__spawn_team += 1
             self.__spawn_team %= 2
 
-    def ev_key_up(self, ev):
-        super(Ameosis, self).ev_key_up(ev)
+    def ev_spawn_thing(self, ev, **kwa):
+        pos = (random.random()*self.screen_width-20,
+               random.random()*self.screen_height-20)
 
-    def ev_user_event_1(self, ev):
-        super(Ameosis, self).ev_user_event_1(ev)
-        ev.pos = (150, 150)
+        spr = AnimatedSprite(self.assets.animations['bomber1'], pos,
+                             self.assets.animations.get_largest_frame('bomber1').get_size())
+
         team = self.spawn_team
-        self._teams_spawn_ts[team] = time.time()
-        army = Army(self.__spawn_size, team, ev.pos)
-        army.battalion = Battalion(self.__spawn_size * 1000, .01)
-        self._armies_lanc_factions[team].add_member(army.battalion)
-        self._armies_sprites[team].add(army)
-        self.__drag_handler.add(army)
+        self._armies_sprites[team].add(spr)
+        self.drag_handler.add(spr)
 
     def update(self):
         super(Ameosis, self).update()
@@ -60,31 +64,22 @@ class Ameosis(AmeosisBase):
         self._debug_lines.append(("Team (left/right): %s" % (self.__spawn_team), 1, (240, 240, 240)))
         self._debug_lines.append(("Simulate (space): %s" % (self._simulate_battle), 1, (240, 240, 240)))
 
-    def draw(self):
-        super(Ameosis, self).draw()
-        # Draw margin lines.
-        width, height = self.__screen.get_size()
-        pygame.draw.circle(self.__screen, (120,120,120),
-                            (width//2, height//2), height//4, 1)
-
-        # pygame.draw.line(self.__screen, (120,120,120),
-        #     (self._margin_lines, 0), (self._margin_lines, height))
-        # pygame.draw.line(self.__screen, (120,120,120),
-        #     (width-self._margin_lines, 0), (width-self._margin_lines, height))
-
 
 if __name__ == "__main__":
     pygame.init()
 
+    screen = pygame.display.set_mode((1024, 512),
+                                     DOUBLEBUF | ASYNCBLIT | RESIZABLE)
     clock = pygame.time.Clock()
-    screen = pygame.display.set_mode((700, 700))
-
     game = Ameosis(screen, clock)
 
-    while not game.done:
+    game.assets.animations.add_from_zip('bomber1', "assets\\bomber1.zip",
+                                        size=(64,64))
+
+    while not game.stopped:
         t1 = time.time()
         game.buffer()
-        game.handle_events()
         game.update()
         game.draw()
+        game.render()
         game.draw_debug(tick_time=time.time() - t1)

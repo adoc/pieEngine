@@ -1,14 +1,11 @@
 import time
 
-from collections import defaultdict
-
 import pygame
 from pygame.locals import *
 
 from lanchester.model.side import Battalion
-
 from ameiosis.sprite import Army
-from ameiosis.game import Ameosis as AmeosisBase
+from pie.game import Ameosis as AmeosisBase
 
 
 class Ameosis(AmeosisBase):

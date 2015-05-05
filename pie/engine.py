@@ -5,12 +5,11 @@ Game Engine.
 import pygame.sprite
 from pygame.locals import *
 
-from ameiosis.engine.asset import AssetHandler
-from ameiosis.engine.event import DragHandler, EventHandler, MouseState
-from ameiosis.engine.sprite import ClickPointSprite
-from ameiosis.engine.animation import AnimationLoop
+from pie.asset import AssetHandler
+from pie.event import DragHandler, EventHandler, MouseState
+from pie.entities import FillSurfaceEntity, DrawSurfaceEntity
 
-from ameiosis.engine.entities import FillSurfaceEntity, DrawSurfaceEntity
+
 
 
 # TODO: Abstract out debug.

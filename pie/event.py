@@ -1,13 +1,9 @@
-import sys
-import traceback
-from collections import defaultdict
-
 import pygame
 from pygame.locals import *
 
-from ameiosis.engine.util import OrderedDefaultDict
+from pie.util import OrderedDefaultDict
 
-from ameiosis.engine.sprite import ClickPointSprite
+from pie.sprite import ClickPointSprite
 
 
 class MouseState:
