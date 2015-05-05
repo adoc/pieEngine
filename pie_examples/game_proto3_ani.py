@@ -8,8 +8,9 @@ import random
 import pygame
 from pygame.locals import *
 
-from pie.sprite import AnimatedSprite
-from ameiosis.game import Ameosis as AmeosisBase
+from pie.entities import AnimatedEntity
+
+from pie_examples.ameiosis.game import Ameosis as AmeosisBase
 
 
 class Ameosis(AmeosisBase):
@@ -19,8 +20,8 @@ class Ameosis(AmeosisBase):
         self.__spawn_team = 0
         self._teams_spawn_ts = {}
 
-        pygame.time.set_timer(self.event.set_next_user_event('ev_spawn_thing'), 10)
-        self.event.bind_user('ev_spawn_thing', self.ev_spawn_thing)
+        pygame.time.set_timer(self.events.set_user('ev_spawn_thing'), 10)
+        self.events.bind_user('ev_spawn_thing', self.ev_spawn_thing)
 
     @property
     def spawn_size(self):
@@ -51,8 +52,7 @@ class Ameosis(AmeosisBase):
         pos = (random.random()*self.screen_width-20,
                random.random()*self.screen_height-20)
 
-        spr = AnimatedSprite(self.assets.animations['bomber1'], pos,
-                             self.assets.animations.get_largest_frame('bomber1').get_size())
+        spr = AnimatedEntity(self.assets.animations['bomber1'], center=pos)
 
         team = self.spawn_team
         self._armies_sprites[team].add(spr)
@@ -73,6 +73,10 @@ if __name__ == "__main__":
     clock = pygame.time.Clock()
     game = Ameosis(screen, clock)
 
+    game._debug_lines.append(("Loading and Processing images...",
+                                    1, (240, 240, 240)))
+    game.draw_debug()
+    game.buffer()
     game.assets.animations.add_from_zip('bomber1', "assets\\bomber1.zip",
                                         size=(64,64))
 

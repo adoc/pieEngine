@@ -10,8 +10,6 @@ from pie.event import DragHandler, EventHandler, MouseState
 from pie.entities import FillSurfaceEntity, DrawSurfaceEntity
 
 
-
-
 # TODO: Abstract out debug.
 class Engine:
     """Game enging base class. Any game implementations will subclass
@@ -38,27 +36,25 @@ class Engine:
 
         self.__stopped = False
         self.__blit_queue = []
-        self.__drag_handler = DragHandler()
+
 
         # Set up subsystems.
         self.assets = AssetHandler(screen)
-        self.event = EventHandler(self) # Allow us to bind to events.
-        self.mouse = MouseState(self.event) # Tracks mouse state using
-                                            # the event handler.
+        self.events = EventHandler() # Allow us to bind to events.
+        self.mouse = MouseState(self.events) # Tracks mouse state using
+                                            # the events handler.
+        self.__drag_handler = DragHandler(self.events, self.mouse)
 
         # Bind events.
-        self.event.bind(QUIT, self.stop)
-        self.event.bind(VIDEORESIZE, self.__ev_resize)
-        self.event.bind(MOUSEBUTTONDOWN, self.__drag_handler.ev_mouse_down)
-        self.event.bind(MOUSEBUTTONUP, self.__drag_handler.ev_mouse_up)
-        self.event.bind(MOUSEMOTION, self.__drag_handler.ev_mouse_motion)
+        self.events.bind(QUIT, self.stop)
+        self.events.bind(VIDEORESIZE, self.__ev_resize)
 
         self._debug_font = pygame.font.Font(None, 18)
         self._debug_pos = (8, 8)
         self._debug_lines = []
 
-    def __ev_resize(self, event, **_):
-        """Resize event callback.
+    def __ev_resize(self, event):
+        """Resize events callback.
 
         :param event:
         :param _:
@@ -74,7 +70,7 @@ class Engine:
             self.__debug_surface.reset(surface_factory=self.__screen.copy)
         self.__screen_width, self.__screen_height = self.__screen.get_size()
 
-    def stop(self, *args, **kwa):
+    def stop(self, event):
         """Flag the engine to stop the ``Engine`` at the next
         opportunity.
         """
@@ -123,7 +119,7 @@ class Engine:
         self.__blit_queue.append(draw)
 
     def update(self):
-        self.event.handle_events()
+        self.events.handle()
         self._debug_lines.append(("FPS: %s" % (self.__clock.get_fps()), 1, (240, 240, 240)))
 
     def buffer(self):
@@ -141,6 +137,6 @@ class Engine:
             self.append_blit(self.__debug_surface.present)
 
     def render(self):
-        for draw in self.__blit_queue:
-            self.__screen.blit(*draw())
+        for presentation in self.__blit_queue:
+            self.__screen.blit(*presentation())
         del self.__blit_queue[:]

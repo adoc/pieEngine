@@ -7,8 +7,8 @@ import pygame
 
 from pie import entities
 from pie.entities import (next_entity_ord, BaseEntity, RectEntity,
-                                      SurfaceEntity, SurfaceRectEntity,
-                                      FillSurfaceEntity)
+                          SurfaceEntity, SurfaceRectEntity,
+                          FillSurfaceEntity)
 
 
 class TestModuleFuncs(unittest.TestCase):

@@ -4,7 +4,7 @@ import pygame
 
 from lanchester.model.side import Battalion
 from pie.event import USER_EVENT_1
-from ameiosis.sprite import Army
+from pie_examples.ameiosis.sprite import Army
 from pie.game import Ameosis as AmeosisBase
 
 

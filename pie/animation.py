@@ -1,28 +1,41 @@
-class AnimationLoop:
-    def __init__(self, bounce=True, once=False):
-        self.__start = False
+class Animation:
+    def __init__(self, auto_start=False):
+        self.__running = auto_start
+
+    def start(self):
+        self.__running = True
+
+    def stop(self):
+        self.__running = False
+
+    @property
+    def running(self):
+        return self.__running
+
+    @property
+    def stopped(self):
+        return not self.__running
+
+
+class AnimationLoop(Animation):
+    def __init__(self, animated_entity, bounce=True, once=False, auto_start=False):
+        Animation.__init__(self, auto_start=auto_start)
+        self.__ae = animated_entity
         self.__bounce = bounce
         self.__once = once
 
-    def start(self):
-        self.__start = True
-
-    def stop(self):
-        self.__start = False
-
-    def update(self, sprite):
-        if self.__start:
+    def update(self):
+        if self.running:
             try:
                 return
             finally:
-                sprite._frame_index += sprite._frame_interval
-                sprite._frame_index %= sprite._frame_count
+                self.__ae.advance()
 
-                if self.__once and sprite._frame_index == 0:
+                if self.__once and self.__ae.at_start:
                     self.__start = False
 
                 if self.__bounce:
-                    if (sprite._frame_index == sprite._frame_count - 1):
-                        sprite._frame_interval = -1
-                    if (sprite._frame_index == 0 and sprite._frame_interval < 0):
-                        sprite._frame_interval = 1
+                    if self.__ae.at_end:
+                        self.__ae.negate_interval()
+                    if self.__ae.at_start and self.__ae.is_reversed:
+                        self.__ae.negate_interval()

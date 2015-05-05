@@ -4,7 +4,7 @@ import pygame
 from pygame.locals import *
 
 from lanchester.model.side import Battalion
-from ameiosis.sprite import Army
+from pie_examples.ameiosis.sprite import Army
 from pie.game import Ameosis as AmeosisBase
 
 
@@ -54,7 +54,7 @@ class Ameosis(AmeosisBase):
             self._simulate_battle = not self._simulate_battle
 
     def ev_mouse_down(self, ev):
-        super(Ameosis, self).ev_mouse_down(ev)
+        super(Ameosis, self).__ev_mouse_down(ev)
         if ev.button == 3: # Right-Click
             army = Army(self.__spawn_size, self.__spawn_team, ev.pos)
 
