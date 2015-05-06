@@ -10,7 +10,7 @@ from pygame.locals import *
 
 from pie.entity import AnimatedEntity
 
-from pie_examples.ameiosis.game import Ameosis as AmeosisBase
+from pie_examples.ameiosis.game import Ameiosis as AmeosisBase
 
 
 class Ameosis(AmeosisBase):

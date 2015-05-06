@@ -1,7 +1,9 @@
 import pygame
+import pygame.math
 
 from pie.util import OrderedDefaultDict
-from pie.sprite import ClickPointSprite
+# from pie.sprite import ClickPointSprite
+from pie.entity import PointEntity
 
 __all__ = ("MouseState",
            "EventHandler",
@@ -47,7 +49,7 @@ class MouseState:
 
         :param ev: Event object.
         """
-        self.__button_state[ev.button - self.__button_index_offset] =\
+        self.__button_state[ev.button + self.__button_index_offset] =\
             self.__button_down_state
 
     def __ev_mouse_up(self, ev):
@@ -55,7 +57,7 @@ class MouseState:
 
         :param ev:
         """
-        self.__button_state[ev.button - self.__button_index_offset] =\
+        self.__button_state[ev.button + self.__button_index_offset] =\
             not self.__button_down_state
 
     def __ev_mouse_motion(self, ev):
@@ -141,32 +143,38 @@ class EventHandler:
 
 
 #TODO: Might need refactor.
-class DragHandler(set):
+class DragHandler(list):
+    """List of draggable objects.
+    """
     def __init__(self, event_handler, mouse_handler, *draggable):
-        set.__init__(self, *draggable)
+        list.__init__(self, *draggable)
         self.__event_handler = event_handler
         self.__mouse_handler = mouse_handler
+        self.__drag_button = 0
+        self.__dragging = None
 
         event_handler.bind(pygame.MOUSEBUTTONDOWN, self.__ev_mouse_down)
         event_handler.bind(pygame.MOUSEBUTTONUP, self.__ev_mouse_up)
         event_handler.bind(pygame.MOUSEMOTION, self.__ev_mouse_motion)
 
-    @property
-    def dragging(self):
-        for sprite in self:
-            if sprite.dragging:
-                yield sprite
-
     def __ev_mouse_down(self, ev):
-        self.__click_sprite = ClickPointSprite(ev.pos[0], ev.pos[1])
+        self.__click_sprite = PointEntity((ev.pos[0], ev.pos[1]))
         for sprite in self:
             if pygame.sprite.collide_circle(self.__click_sprite, sprite):
-                sprite.drag(self.__click_sprite)
+                self.__dragging = (sprite,
+                                   pygame.math.Vector2(sprite.rect.topleft) -
+                                   pygame.math.Vector2(
+                                       self.__click_sprite.rect.topleft))
 
     def __ev_mouse_up(self, ev):
-        for sprite in self.dragging:
-            sprite.un_drag()
+        self.__dragging = None
 
-    def __ev_mouse_motion(self, ev, engine=None):
-        if self.__mouse_handler.buttons[0] is True:
-            self.__click_sprite.rect.center = (ev.pos[0], ev.pos[1])
+    def __ev_mouse_motion(self, ev):
+        if (self.__dragging and
+                    self.__mouse_handler.buttons[self.__drag_button] is True):
+            self.__click_sprite.rect.topleft = (ev.pos[0], ev.pos[1])
+
+    def update(self):
+        if self.__dragging:
+            sprite, offset = self.__dragging
+            sprite.rect.topleft = self.__click_sprite.rect.topleft + offset

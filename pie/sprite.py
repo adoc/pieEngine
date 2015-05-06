@@ -5,9 +5,8 @@ from pie.animation import AnimationLoop
 
 # TODO Make this an entity (?)
 class ClickPointSprite(pygame.sprite.Sprite):
-    def __init__(self, x, y, radius=1):
-        self.rect = pygame.Rect((x, y), (1,1))
-        self.radius = radius
+    def __init__(self, x, y):
+        self.rect = pygame.Rect((x, y), (0,0))
 
 
 # TODO: Not finished. Flesh this out and possibly make it an entity.
@@ -39,9 +38,9 @@ class DragableSpriteMixin:
     def dragging(self):
         return self.__dragging
 
-    @property
-    def drag_sprite(self):
-        return self.__drag_sprite
+    # @property
+    # def drag_sprite(self):
+    #     return self.__drag_sprite
 
     def un_drag(self):
         self.__dragging = False

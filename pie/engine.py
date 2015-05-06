@@ -47,7 +47,7 @@ class Engine(MRunnable):
         self.__drag_handler = DragHandler(self.events, self.mouse)
 
         # Bind events.
-        self.events.bind(QUIT, self.stop)
+        self.events.bind(QUIT, lambda ev: self.stop())
         self.events.bind(VIDEORESIZE, self.__ev_resize)
 
         self._debug_font = pygame.font.Font(None, 18)
@@ -108,6 +108,7 @@ class Engine(MRunnable):
 
     def update(self):
         self.events.handle()
+        self.drag_handler.update()
         self._debug_lines.append(("FPS: %s" % (self.__clock.get_fps()), 1, (240, 240, 240)))
 
     def buffer(self):

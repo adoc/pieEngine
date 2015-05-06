@@ -7,14 +7,37 @@ from pygame.locals import *
 
 from lanchester.model.side import Battalion
 from pie_examples.ameiosis.sprite import Army
-from pie.game import Ameosis as AmeosisBase
+from pie_examples.ameiosis.game import Ameiosis as AmeosisBase
 
 
 class Ameosis(AmeosisBase):
-    def __init__(self, surface, clock, **kwa):
-        super(Ameosis, self).__init__(surface, clock, **kwa)
+    def __init__(self,*args, **kwa):
+        super(Ameosis, self).__init__(*args, **kwa)
         self.__spawn_size = 1
         self.__spawn_team = 0
+
+        self.events.bind(K_UP, self.__ev_inc_spawn_size)
+        self.events.bind(K_DOWN, self.__ev_dec_spawn_size)
+        self.events.bind(K_LEFT, self.__ev_dec_team)
+        self.events.bind(K_RIGHT, self.__ev_inc_team)
+        self.events.bind(K_SPACE, self.__ev_tog_simulate)
+
+        self.events.bind(MOUSEBUTTONDOWN, self.__ev_mouse_down)
+
+    def __ev_inc_spawn_size(self, ev):
+        self.spawn_size += 1
+
+    def __ev_dec_spawn_size(self, ev):
+        self.spawn_size -= 1
+
+    def __ev_inc_team(self, ev):
+        self.spawn_team += 1
+
+    def __ev_dec_team(self, ev):
+        self.spawn_team -= 1
+
+    def __ev_tog_simulate(self, ev):
+        self._simulate_battle = not self._simulate_battle
 
     @property
     def spawn_size(self):
@@ -42,21 +65,7 @@ class Ameosis(AmeosisBase):
         else:
             self.__spawn_team = val
 
-    def ev_key_up(self, ev):
-        super(Ameosis, self).ev_key_up(ev)
-        if ev.key == K_UP:
-            self.spawn_size += 1
-        elif ev.key == K_DOWN:
-            self.spawn_size -= 1
-        elif ev.key == K_RIGHT:
-            self.spawn_team += 1
-        elif ev.key == K_LEFT:
-            self.spawn_team -= 1
-        elif ev.key == K_SPACE:
-            self._simulate_battle = not self._simulate_battle
-
-    def ev_mouse_down(self, ev):
-        super(Ameosis, self).__ev_mouse_down(ev)
+    def __ev_mouse_down(self, ev):
         if ev.button == 3: # Right-Click
             army = Army(self.__spawn_size, self.__spawn_team, ev.pos)
 

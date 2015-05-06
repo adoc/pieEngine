@@ -4,9 +4,10 @@ from collections import defaultdict
 import pygame
 from pygame.locals import *
 
+from pie.engine import Engine
+
 from lanchester.model import LanchesterSquareAllies
 from lanchester.model.side import Faction, Engagement
-from pie.engine import Engine
 
 
 Engagement = partial(Engagement, alg=LanchesterSquareAllies())
@@ -54,33 +55,30 @@ class BattleHandler:
             self.__engagments.remove(engagement)
 
 
-class Ameosis(Engine):
+class Ameiosis(Engine):
     def __init__(self, screen, clock, **kwa):
-        super(Ameosis, self).__init__(screen, clock, **kwa)
+        super(Ameiosis, self).__init__(screen, clock, **kwa)
         self._armies_sprites = defaultdict(pygame.sprite.Group)
         self._armies_lanc_factions = defaultdict(self._make_faction)
         self.__faction_count = 0
         self._simulate_battle = False
         self.__battlehandler = BattleHandler(self._armies_sprites)
 
+        self.events.bind(K_ESCAPE, self.stop)
+
     def _make_faction(self):
         self.__faction_count += 1
         return Faction(self.__faction_count)
 
-    def ev_key_up(self, ev):
-        super(Ameosis, self).ev_key_up(ev)
-        if ev.key == K_ESCAPE:
-            self.stop()
-
     def update(self):
-        super(Ameosis, self).update()
+        super(Ameiosis, self).update()
         if self._simulate_battle:
             self.__battlehandler.update()
 
         self._debug_lines.append(("ESC to exit.", 1, (240,240,240)))
 
     def draw(self):
-        super(Ameosis, self).draw()
+        super(Ameiosis, self).draw()
         for team in self._armies_sprites.values():
             for obj in team:
                 obj.update()

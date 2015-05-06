@@ -206,6 +206,14 @@ class SurfaceRectEntity(RectEntity, SurfaceEntity):
         self.__rect = self.__rect.fit(rect)
 
 
+# User Implementable Classes
+class PointEntity(pygame.sprite.Sprite, RectEntity):
+    def __init__(self, pos, radius=1, sprite_groups=[]):
+        RectEntity.__init__(self, pos, (0, 0))
+        pygame.sprite.Sprite.__init__(self, *sprite_groups)
+        self.radius = radius
+
+
 class SpriteEntity(pygame.sprite.Sprite, SurfaceRectEntity):
     def __init__(self, *surface_args, surface_factory=None,
                  sprite_groups=[], **surface_rect_kwa):
