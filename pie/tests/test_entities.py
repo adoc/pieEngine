@@ -5,8 +5,8 @@ random = SystemRandom()
 
 import pygame
 
-from pie import entities
-from pie.entities import (next_entity_ord, BaseEntity, RectEntity,
+from pie import entity
+from pie.entity import (next_entity_ord, BaseEntity, RectEntity,
                           SurfaceEntity, SurfaceRectEntity,
                           FillSurfaceEntity)
 
@@ -16,7 +16,7 @@ class TestModuleFuncs(unittest.TestCase):
     """
 
     def setUp(self):
-        entities._reset_entity_ord(confirm=True)
+        entity._reset_entity_ord(confirm=True)
 
     def test_next_entity_ord(self):
         for i in range(1, 100):
@@ -26,20 +26,20 @@ class TestModuleFuncs(unittest.TestCase):
         for i in range(1, 100):
             self.assertEqual(next_entity_ord(), i)
 
-        entities._reset_entity_ord()
+        entity._reset_entity_ord()
         self.assertEqual(next_entity_ord(), 100)
 
-        entities._reset_entity_ord(confirm=False)
+        entity._reset_entity_ord(confirm=False)
         self.assertEqual(next_entity_ord(), 101)
 
-        entities._reset_entity_ord(confirm=True)
+        entity._reset_entity_ord(confirm=True)
         self.assertEqual(next_entity_ord(), 1)
 
 class TestBaseEntity(unittest.TestCase):
     def setUp(self):
         self.__ord = 0
         self.__id = 0
-        entities._reset_entity_ord(confirm=True)
+        entity._reset_entity_ord(confirm=True)
 
     def ord_factory(self):
         self.__ord += 1

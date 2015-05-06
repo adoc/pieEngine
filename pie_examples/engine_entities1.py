@@ -1,7 +1,7 @@
 import pygame
 from pygame.locals import *
 
-from pie.entities import FillSurfaceEntity
+from pie.entity import FillSurfaceEntity
 
 
 if __name__ == "__main__":

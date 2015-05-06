@@ -8,7 +8,7 @@ import random
 import pygame
 from pygame.locals import *
 
-from pie.entities import AnimatedEntity
+from pie.entity import AnimatedEntity
 
 from pie_examples.ameiosis.game import Ameosis as AmeosisBase
 

@@ -2,35 +2,36 @@ import unittest
 
 import pygame
 
-from pie.entities import AnimatedEntity
-from pie.animation import Animation, AnimationLoop
+from pie.entity import AnimatedEntity
+from pie.animation import AnimationLoop
+from pie.base import MRunnable
 
 
 class TestAnimation(unittest.TestCase):
     def test_init(self):
-        a = Animation()
+        a = MRunnable()
         self.assertFalse(a._Animation__running)
 
-        a = Animation(auto_start=True)
+        a = MRunnable(auto_start=True)
         self.assertTrue(a._Animation__running)
 
     def test_start(self):
-        a = Animation()
+        a = MRunnable()
         a.start()
         self.assertTrue(a._Animation__running)
 
     def test_stop(self):
-        a = Animation()
+        a = MRunnable()
         a.stop()
         self.assertFalse(a._Animation__running)
 
     def test_running(self):
-        a = Animation()
+        a = MRunnable()
         a.start()
         self.assertTrue(a.running)
 
     def test_stopped(self):
-        a = Animation()
+        a = MRunnable()
         a.start()
         self.assertFalse(a.stopped)
 

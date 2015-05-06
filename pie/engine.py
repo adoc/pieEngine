@@ -5,19 +5,20 @@ Game Engine.
 import pygame.sprite
 from pygame.locals import *
 
+from pie.base import MRunnable
 from pie.asset import AssetHandler
 from pie.event import DragHandler, EventHandler, MouseState
-from pie.entities import FillSurfaceEntity, DrawSurfaceEntity
+from pie.entity import FillSurfaceEntity, DrawSurfaceEntity
 
 __all__ = ("Engine",)
 
 
 # TODO: Abstract out debug.
-class Engine:
+class Engine(MRunnable):
     """Game enging base class. Any game implementations will subclass
     from this.
     """
-    def __init__(self, screen, clock, target_fps=60, debug=False):
+    def __init__(self, screen, clock, target_fps=60, debug=False, auto_start=True):
         """
 
         :param pygame.Surface: Pygame screen this ``Engine`` is rendering to.
@@ -26,7 +27,7 @@ class Engine:
         :param BackGround background: ``Background`` instance
         :return:
         """
-
+        MRunnable.__init__(self, auto_start=auto_start)
         self.__clear_surface = FillSurfaceEntity(surface_factory=screen.copy)
         self.__draw_surface = DrawSurfaceEntity(surface_factory=screen.copy)
         self.__debug_surface = DrawSurfaceEntity(surface_factory=screen.copy)
@@ -36,9 +37,7 @@ class Engine:
         self.__target_fps = target_fps
         self.__debug = debug
 
-        self.__stopped = False
         self.__blit_queue = []
-
 
         # Set up subsystems.
         self.assets = AssetHandler(screen)
@@ -71,13 +70,6 @@ class Engine:
             self.__clear_surface.reset(surface_factory=self.__screen.copy)
             self.__debug_surface.reset(surface_factory=self.__screen.copy)
         self.__screen_width, self.__screen_height = self.__screen.get_size()
-
-    @property
-    def stopped(self):
-        """Engine is done.
-        :return: bool True when engine should be stopped as soon as possible
-        """
-        return self.__stopped
 
     @property
     def screen_width(self):
@@ -136,9 +128,3 @@ class Engine:
         for presentation in self.__blit_queue:
             self.__screen.blit(*presentation())
         del self.__blit_queue[:]
-
-    def stop(self, event):
-        """Flag the engine to stop the ``Engine`` at the next
-        opportunity.
-        """
-        self.__stopped = True
