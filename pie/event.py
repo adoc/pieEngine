@@ -3,6 +3,10 @@ import pygame
 from pie.util import OrderedDefaultDict
 from pie.sprite import ClickPointSprite
 
+__all__ = ("MouseState",
+           "EventHandler",
+           "DragHandler")
+
 
 class MouseState:
     """Tracks mouse state
@@ -136,6 +140,7 @@ class EventHandler:
         pygame.event.clear()
 
 
+#TODO: Might need refactor.
 class DragHandler(set):
     def __init__(self, event_handler, mouse_handler, *draggable):
         set.__init__(self, *draggable)

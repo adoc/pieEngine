@@ -22,13 +22,57 @@ class TestModuleFuncs(unittest.TestCase):
         for i in range(1, 100):
             self.assertEqual(next_entity_ord(), i)
 
-    def test_entity_base(self):
+    def test__reset_entity_ord(self):
+        for i in range(1, 100):
+            self.assertEqual(next_entity_ord(), i)
+
+        entities._reset_entity_ord()
+        self.assertEqual(next_entity_ord(), 100)
+
+        entities._reset_entity_ord(confirm=False)
+        self.assertEqual(next_entity_ord(), 101)
+
+        entities._reset_entity_ord(confirm=True)
+        self.assertEqual(next_entity_ord(), 1)
+
+class TestBaseEntity(unittest.TestCase):
+    def setUp(self):
+        self.__ord = 0
+        self.__id = 0
+        entities._reset_entity_ord(confirm=True)
+
+    def ord_factory(self):
+        self.__ord += 1
+        return self.__ord
+
+    def id_factory(self):
+        self.__id += 10
+        return self.__id
+
+    def test_base_entity(self):
         for i in range(1, 100):
             entity = BaseEntity()
-            self.assertEqual(entity.ord, i)
-            self.assertIsInstance(entity.uuid, uuid.UUID)
-            self.assertIsInstance(entity.id, int)
-            self.assertGreater(entity.id, 0 )
+            self.assertEqual(entity.ord, i+i-1)
+            self.assertIsInstance(entity.id, uuid.UUID)
+
+            entity = BaseEntity(ord_factory=self.ord_factory)
+            self.assertEqual(entity.ord, self.__ord)
+
+            entity = BaseEntity(id_factory=self.id_factory)
+            self.assertEqual(entity.id, self.__id)
+
+            entity = BaseEntity(ord_factory=self.ord_factory,
+                                id_factory=self.id_factory)
+            self.assertEqual(entity.ord, self.__ord)
+            self.assertEqual(entity.id, self.__id)
+
+    def test_update(self):
+        entity = BaseEntity()
+        self.assertRaises(NotImplementedError, entity.update)
+
+    def test_present(self):
+        entity = BaseEntity()
+        self.assertRaises(NotImplementedError, entity.present)
 
 
 class TestRectBase(unittest.TestCase):
@@ -90,7 +134,6 @@ class TestRectEntity(TestRectBase):
             self.assertLessEqual(r4.rect.bottom, 2000)
             self.assertGreaterEqual(r4.rect.bottom, r4.rect.top)
 
-
     def test_rect_reset(self):
         for pr in self.proto_rect:
             pr_r = self.proto_rect[self.frndi(len(self.proto_rect))]
@@ -139,6 +182,27 @@ class TestRectEntity(TestRectBase):
             self.assertGreaterEqual(r1.rect.bottom, 0)
             self.assertLessEqual(r1.rect.bottom, 2000)
             self.assertGreaterEqual(r1.rect.bottom, r1.rect.top)
+
+    def test_rect_move(self):
+        assert False
+
+    def test_rect_inflate(self):
+        assert False
+
+    def test_rect_clamp(self):
+        assert False
+
+    def test_rect_clip(self):
+        assert False
+
+    def test_rect_union(self):
+        assert False
+
+    def test_rect_unionall(self):
+        assert False
+
+    def test_rect_fit(self):
+        assert False
 
 
 class TestSurfaceEntity(TestRectBase):
@@ -223,7 +287,7 @@ class TestSurfaceEntity(TestRectBase):
         pygame.init()
         pygame.display.set_mode((100,100), pygame.SRCALPHA, 32)
         for pr in self.proto_rect:
-            so = pygame.Surface(pr.size, 0, 8)
+            so = pygame.Surface(pr.size, pygame.SRCALPHA, 32)
 
             s1 = SurfaceRectEntity(pr.size, 0, 24)
             s1.surface_convert_alpha(so)
@@ -336,6 +400,39 @@ class TestSurfaceRectEntity(TestRectBase):
             self.assertIs(surface, s.surface)
             self.assertIs(rect, s.rect)
 
+    def test_rect_inflate(self):
+        assert False
+
+    def test_rect_clamp(self):
+        assert False
+
+    def test_rect_clip(self):
+        assert False
+
+    def test_rect_union(self):
+        assert False
+
+    def test_rect_unionall(self):
+        assert False
+
+    def test_rect_fit(self):
+        assert False
+
+
+class TestSpriteEntity(unittest.TestCase):
+    def test_init(self):
+        assert False
+
+
+class TestDirtySpriteEntity(unittest.TestCase):
+    def test_init(self):
+        assert False
+
+
+class TestDrawSurfaceEntity(unittest.TestCase):
+    def test_init(self):
+        assert False
+
 
 class TestFillEntity(TestRectBase):
     def test_init(self):
@@ -349,3 +446,36 @@ class TestFillEntity(TestRectBase):
         s = FillSurfaceEntity((100,100), 0, 24, fill_color=(255,255,255))
         for byte in s.surface.get_buffer().raw:
             self.assertEqual(byte, 255)
+
+
+class TestAnimatedEntity(unittest.TestCase):
+    def test_init(self):
+        assert False
+
+    def test_prop_at_start(self):
+        assert False
+
+    def test_prop_at_end(self):
+        assert False
+
+    def test_prop_is_reversed(self):
+        assert False
+
+    def test_prop_surface(self):
+        assert False
+
+    def test_advance(self):
+        assert False
+
+    def test_negate_interval(self):
+        assert False
+
+    def test_rewind(self):
+        assert False
+
+    def test_update(self):
+        assert False
+
+    def test_present(self):
+        assert False
+

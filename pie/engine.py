@@ -9,6 +9,8 @@ from pie.asset import AssetHandler
 from pie.event import DragHandler, EventHandler, MouseState
 from pie.entities import FillSurfaceEntity, DrawSurfaceEntity
 
+__all__ = ("Engine",)
+
 
 # TODO: Abstract out debug.
 class Engine:
@@ -69,12 +71,6 @@ class Engine:
             self.__clear_surface.reset(surface_factory=self.__screen.copy)
             self.__debug_surface.reset(surface_factory=self.__screen.copy)
         self.__screen_width, self.__screen_height = self.__screen.get_size()
-
-    def stop(self, event):
-        """Flag the engine to stop the ``Engine`` at the next
-        opportunity.
-        """
-        self.__stopped = True
 
     @property
     def stopped(self):
@@ -140,3 +136,9 @@ class Engine:
         for presentation in self.__blit_queue:
             self.__screen.blit(*presentation())
         del self.__blit_queue[:]
+
+    def stop(self, event):
+        """Flag the engine to stop the ``Engine`` at the next
+        opportunity.
+        """
+        self.__stopped = True

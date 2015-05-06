@@ -8,6 +8,10 @@ from collections import defaultdict
 
 import pygame
 
+__all__ = ("Animations",
+           "get_largest_frame",
+           "AssetHandler")
+
 
 class Animations(defaultdict):
     def __init__(self, screen):

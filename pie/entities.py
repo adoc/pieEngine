@@ -2,12 +2,20 @@ import uuid
 
 import pygame
 
-from pie.animation import *
+from pie.animation import AnimationLoop
 from pie.asset import get_largest_frame
 
 
-# TODO: Needs to be updated, otherwise we need to allow ALL.
-#__all__ = ('next_entity_ord', 'EntityBase', 'RectEntity', 'SurfaceEntity')
+__all__ = ('next_entity_ord',
+           'BaseEntity',
+           'RectEntity',
+           'SurfaceEntity',
+           'SurfaceRectEntity',
+           'SpriteEntity',
+           'DirtySpriteEntity',
+           'FillSurfaceEntity',
+           'DrawSurfaceEntity',
+           'AnimatedEntity')
 
 
 __entity_ord = 0
@@ -37,7 +45,11 @@ class BaseEntity:
     """
 
     def __init__(self, ord_factory=next_entity_ord, id_factory=uuid.uuid4):
-        """
+        """Base parent class for all Entities. Provides an ordinal
+        ``ord`` and unique identifier ``id``. Default uses module-level
+        counter for the ordinal and UUID4 for the id. Either can be
+        overridden by passing an ``ord_factory`` and/or ``id_factory``
+        keyword argument.
 
         :param ord_factory:
         :param id_factory:
@@ -47,26 +59,34 @@ class BaseEntity:
 
         """
         self.__ord = ord_factory()
-        self.__uuid = id_factory()
+        self.__id = id_factory()
 
     @property
     def ord(self):
+        """Return the ordinal of this entity.
+        """
         return self.__ord
 
     @property
-    def uuid(self):
-        return self.__uuid
-
-    @property
     def id(self):
-        return self.__uuid.int
+        """Return the unique identifier of this entity. (By default is
+        a UUID object.
+        """
+        return self.__id
 
     def update(self):
-        raise NotImplementedError("Entity ``update`` method is not implemented.")
+        raise NotImplementedError("Entity ``update`` method is not "
+                                  "implemented.")
+
+    def present(self):
+        raise NotImplementedError("Entity ``present`` method is not "
+                                  "implemented.")
 
 
 class RectEntity(BaseEntity):
-    """
+    """Container Entity for a ``pygame.Rect`` object. Provides
+    ``rect`` property to get the ``Rect`` object. Also provides a
+    ``reset`` method to replace the current ``Rect``.
     """
 
     def __init__(self, *rect_args, rect_factory=None):
@@ -75,11 +95,42 @@ class RectEntity(BaseEntity):
 
     @property
     def rect(self):
+        """Returns the ``Rect`` object.
+        """
         return self.__rect
 
     def reset(self, *rect_args, rect_factory=None):
+        """Reset the ``Rect`` object.
+
+        :param *rect_args: passed directly to a ``pygame.Rect``
+            constructor
+        :param rect_factory: Rect factory function. This takes
+            precedence over ``*rect_args``
+        """
         self.__rect = (callable(rect_factory) and rect_factory() or
                        pygame.Rect(*rect_args))
+        self.__rect.normalize()
+
+    def rect_move(self, x, y):
+        self.__rect = self.__rect.move(x, y)
+
+    def rect_inflate(self, x, y):
+        self.__rect = self.__rect.inflate(x, y)
+
+    def rect_clamp(self, rect):
+        self.__rect = self.__rect.clamp(rect)
+
+    def rect_clip(self, rect):
+        self.__rect = self.__rect.clip(rect)
+
+    def rect_union(self, rect):
+        self.__rect = self.__rect.union(rect)
+
+    def rect_unionall(self, rect_sequence):
+        self.__rect = self.__rect.unionall(rect_sequence)
+
+    def rect_fit(self, rect):
+        self.__rect = self.__rect.fit(rect)
 
 
 class SurfaceEntity(BaseEntity):
@@ -103,8 +154,7 @@ class SurfaceEntity(BaseEntity):
     def image(self):
         """Synonym to enable mixing with ``pygame.sprite.Sprite``
         """
-        # TODO: This assumes subclassing Sprite. Determine if we subclass or compose it.
-        return self.__surface
+        return self.surface
 
     def reset(self, *surface_args, surface_factory=None):
         self.__surface = (callable(surface_factory) and surface_factory() or
@@ -115,6 +165,10 @@ class SurfaceEntity(BaseEntity):
 
     def surface_convert_alpha(self, *args, **kwa):
         self.__surface = self.__surface.convert_alpha(*args, **kwa)
+
+    def surface_transform(self, xform_func, *xform_args, **xform_kwa):
+        self.reset(surface_factory=lambda: xform_func(self.__surface,
+                                                      *xform_args, **xform_kwa))
 
 
 class SurfaceRectEntity(RectEntity, SurfaceEntity):
@@ -131,25 +185,51 @@ class SurfaceRectEntity(RectEntity, SurfaceEntity):
     def present(self):
         return (self.surface, self.rect)
 
+    # Override rect methods that will transform the final surface.
+    # TODO: Update with transforms!
+    def rect_inflate(self, x, y):
+        self.__rect = self.__rect.inflate(x, y)
+
+    def rect_clamp(self, rect):
+        self.__rect = self.__rect.clamp(rect)
+
+    def rect_clip(self, rect):
+        self.__rect = self.__rect.clip(rect)
+
+    def rect_union(self, rect):
+        self.__rect = self.__rect.union(rect)
+
+    def rect_unionall(self, rect_sequence):
+        self.__rect = self.__rect.unionall(rect_sequence)
+
+    def rect_fit(self, rect):
+        self.__rect = self.__rect.fit(rect)
+
 
 class SpriteEntity(pygame.sprite.Sprite, SurfaceRectEntity):
     def __init__(self, *surface_args, surface_factory=None,
                  sprite_groups=[], **surface_rect_kwa):
         BaseEntity.__init__(self)
-        pygame.sprite.Sprite.__init__(*sprite_groups)
         SurfaceRectEntity.reset(*surface_args,
                                         surface_factory=surface_factory,
                                         **surface_rect_kwa)
+        pygame.sprite.Sprite.__init__(*sprite_groups)
 
 
 class DirtySpriteEntity(pygame.sprite.DirtySprite, SurfaceRectEntity):
     def __init__(self, *surface_args, surface_factory=None,
                  sprite_groups=[], **surface_rect_kwa):
         BaseEntity.__init__(self)
-        pygame.sprite.DirtySprite.__init__(*sprite_groups)
         SurfaceRectEntity.reset(*surface_args,
                                         surface_factory=surface_factory,
                                         **surface_rect_kwa)
+        pygame.sprite.DirtySprite.__init__(*sprite_groups)
+
+
+class DrawSurfaceEntity(SurfaceRectEntity):
+    """A surface used generally for ``pygame.draw`` operations.
+    """
+    pass
 
 
 class FillSurfaceEntity(SurfaceRectEntity):
@@ -166,12 +246,6 @@ class FillSurfaceEntity(SurfaceRectEntity):
                                 surface_factory=surface_factory, **rect_kwa)
         self.__fill_color = fill_color
         self.surface.fill(self.__fill_color)
-
-
-class DrawSurfaceEntity(SurfaceRectEntity):
-    """A surface used generally for drawing.
-    """
-    pass
 
 
 class AnimatedEntity(pygame.sprite.Sprite, RectEntity):
@@ -194,6 +268,7 @@ class AnimatedEntity(pygame.sprite.Sprite, RectEntity):
         if autostart:
             self.__animation_obj.start()
 
+    #Transport props
     @property
     def at_start(self):
         return self.__frame_index == 0
@@ -210,6 +285,9 @@ class AnimatedEntity(pygame.sprite.Sprite, RectEntity):
     def surface(self):
         return self.__frames[self.__frame_index]
 
+    # def convert
+
+    # Transport methods
     def advance(self):
         self.__frame_index += self.__frame_interval
         self.__frame_index %= self.__frame_count
@@ -220,6 +298,7 @@ class AnimatedEntity(pygame.sprite.Sprite, RectEntity):
     def rewind(self):
         self.__frame_index = 0
 
+    # Loop Method
     def update(self):
         self.__animation_obj.update()
 

@@ -3,12 +3,14 @@ import pygame
 from pie.animation import AnimationLoop
 
 
+# TODO Make this an entity (?)
 class ClickPointSprite(pygame.sprite.Sprite):
     def __init__(self, x, y, radius=1):
         self.rect = pygame.Rect((x, y), (1,1))
         self.radius = radius
 
 
+# TODO: Not finished. Flesh this out and possibly make it an entity.
 class AnimatedSpriteCluster:
     def __init__(self, animated_sprites, pos, size, distribution_function=None, animation_function=None):
         self.__animated_sprites = animated_sprites
@@ -24,6 +26,7 @@ class AnimatedSpriteCluster:
         map(lambda s: s.draw(surface), self.__animated_sprites)
 
 
+# TODO: Do we want to make this an Entity feature?
 class DragableSpriteMixin:
     """ Allows a sprite to be dragged.
     Game class must implement ``engine.events.Draghandler``.
