@@ -48,4 +48,8 @@ def get_largest_frame(frame_list):
 
 class AssetHandler:
     def __init__(self, screen):
+        self.__screen = screen
         self.animations = Animations(screen)
+
+    def get_image(self, filepath):
+        return pygame.image.load(filepath).convert_alpha(self.__screen)

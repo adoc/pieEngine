@@ -419,6 +419,11 @@ class TestSurfaceRectEntity(TestRectBase):
         assert False
 
 
+class TestPointEntity(unittest.TestCase):
+    def test__init__(self):
+        assert False
+
+
 class TestSpriteEntity(unittest.TestCase):
     def test_init(self):
         assert False

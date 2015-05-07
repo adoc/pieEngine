@@ -1,6 +1,15 @@
 from collections import OrderedDict
 
 
+__all__ = ('fallback_factories', 'OrderedDefaultDict')
+
+
+def fallback_factory(*factories, factory_args=(), factory_kwa={}):
+    for factory in factories:
+        if factory:
+            return factory(*factory_args, **factory_kwa)
+
+
 class OrderedDefaultDict(OrderedDict):
     """Simplest OrderedDict and ``defaultdict``-like functionality.
     """

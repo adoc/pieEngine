@@ -1,3 +1,5 @@
+# TODO: Module needs to refactor away from "reset" methods. .reset may not be needed.
+
 import uuid
 
 import pygame
@@ -11,10 +13,12 @@ __all__ = ('next_entity_ord',
            'RectEntity',
            'SurfaceEntity',
            'SurfaceRectEntity',
+           'PointEntity',
            'SpriteEntity',
            'DirtySpriteEntity',
-           'FillSurfaceEntity',
            'DrawSurfaceEntity',
+           'FillSurfaceEntity',
+           'FillSpriteEntity',
            'AnimatedEntity')
 
 
@@ -208,9 +212,8 @@ class SurfaceRectEntity(RectEntity, SurfaceEntity):
 
 # User Implementable Classes
 class PointEntity(pygame.sprite.Sprite, RectEntity):
-    def __init__(self, pos, radius=1, sprite_groups=[]):
+    def __init__(self, pos, radius=0):
         RectEntity.__init__(self, pos, (0, 0))
-        pygame.sprite.Sprite.__init__(self, *sprite_groups)
         self.radius = radius
 
 
@@ -228,16 +231,23 @@ class DirtySpriteEntity(pygame.sprite.DirtySprite, SurfaceRectEntity):
     def __init__(self, *surface_args, surface_factory=None,
                  sprite_groups=[], **surface_rect_kwa):
         BaseEntity.__init__(self)
-        SurfaceRectEntity.reset(*surface_args,
+        SurfaceRectEntity.reset(self, *surface_args,
                                         surface_factory=surface_factory,
                                         **surface_rect_kwa)
-        pygame.sprite.DirtySprite.__init__(*sprite_groups)
+        pygame.sprite.DirtySprite.__init__(self, *sprite_groups)
 
 
-class DrawSurfaceEntity(SurfaceRectEntity):
+class DrawSurfaceEntity(pygame.sprite.Sprite, SurfaceRectEntity):
     """A surface used generally for ``pygame.draw`` operations.
     """
-    pass
+    def __init__(self, *surface_args, surface_factory=None,
+                 sprite_groups=[], **surface_rect_kwa):
+        BaseEntity.__init__(self)
+        SurfaceRectEntity.reset(self, *surface_args,
+                                        surface_factory=surface_factory,
+                                        **surface_rect_kwa)
+        pygame.sprite.Sprite.__init__(self, *sprite_groups)
+
 
 
 class FillSurfaceEntity(SurfaceRectEntity):
@@ -254,6 +264,34 @@ class FillSurfaceEntity(SurfaceRectEntity):
                                 surface_factory=surface_factory, **rect_kwa)
         self.__fill_color = fill_color
         self.surface.fill(self.__fill_color)
+
+
+class FillSpriteEntity(SpriteEntity):
+    def __init__(self, *surface_args, surface_factory=None,
+                 fill_color=pygame.Color(0, 0, 0), sprite_groups=[],
+                 **rect_kwa):
+        BaseEntity.__init__(self)
+        self.reset(*surface_args, surface_factory=surface_factory,
+              fill_color=fill_color, **rect_kwa)
+        pygame.sprite.Sprite.__init__(self, *sprite_groups)
+
+    def reset(self, *surface_args, surface_factory=None,
+                 fill_color=pygame.Color(0, 0, 0), sprite_groups=[],
+                 **rect_kwa):
+        SpriteEntity.reset(self, *surface_args,
+                           **rect_kwa)
+        self.__fill_color = fill_color
+        self.surface.fill(self.__fill_color)
+
+
+class ImageSpriteEntity(SpriteEntity):
+    def __init__(self, *surface, sprite_groups=[], surface_factory=None, **rect_args):
+        BaseEntity.__init__(self)
+        self.reset(surface_factory=lambda: surface and surface[0] or
+                                           surface_factory, **rect_args)
+
+    def group_clear(self, surface, rect):
+        surface.blit(self.image, rect, area=rect)
 
 
 class AnimatedEntity(pygame.sprite.Sprite, RectEntity):
@@ -293,8 +331,6 @@ class AnimatedEntity(pygame.sprite.Sprite, RectEntity):
     def surface(self):
         return self.__frames[self.__frame_index]
 
-    # def convert
-
     # Transport methods
     def advance(self):
         self.__frame_index += self.__frame_interval
@@ -312,3 +348,33 @@ class AnimatedEntity(pygame.sprite.Sprite, RectEntity):
 
     def present(self):
         return (self.surface, self.rect)
+
+
+class CompositeEntity(BaseEntity):
+    def __init__(self):
+        pass
+
+    # rect??
+    # dirty rect?
+
+
+    def present_comp(self):
+        pass
+
+
+
+
+# TODO: Not finished. Flesh this out and possibly make it an entity.
+class AnimatedSpriteCluster:
+    def __init__(self, animated_sprites, pos, size, distribution_function=None, animation_function=None):
+        self.__animated_sprites = animated_sprites
+        self.rect = pygame.Rect(pos[0], pos[1], size[0], size[1])
+
+        self.__distribution_function = distribution_function
+        self.__animation_function = animation_function
+
+    def update(self):
+        map(lambda s: s.update(), self.__animated_sprites)
+
+    def draw(self, surface):
+        map(lambda s: s.draw(surface), self.__animated_sprites)
