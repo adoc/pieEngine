@@ -2,70 +2,11 @@ import pygame
 import pygame.math
 
 from pie.util import OrderedDefaultDict
-# from pie.sprite import ClickPointSprite
 from pie.entity import PointEntity
 
-__all__ = ("MouseState",
-           "EventHandler",
+
+__all__ = ("EventHandler",
            "DragHandler")
-
-
-class MouseState:
-    """Tracks mouse state
-    """
-    def __init__(self, event_handler, button_down_state=True,
-                 button_index_offset=-1):
-        self.__button_down_state = button_down_state
-        self.__button_index_offset = button_index_offset
-        self.__button_state = [None] * 8
-        self.__pos_state = (None,) * 2
-
-        # Set up mouse events bindings.
-        event_handler.bind(pygame.MOUSEBUTTONDOWN, self.__ev_mouse_down)
-        event_handler.bind(pygame.MOUSEBUTTONUP, self.__ev_mouse_up)
-        event_handler.bind(pygame.MOUSEMOTION, self.__ev_mouse_motion)
-
-    @property
-    def buttons(self):
-        """Returns a list of mouse buttons that are down. By default,
-        buttons are zero-indexed (i.e. button 1 is .buttons[0]), and
-        True when down, False when up, and None when there's been no
-        state update.
-
-        :return: List of mouse button down states.
-        """
-        return self.__button_state
-
-    @property
-    def pos(self):
-        """Returns the current mouse position.
-
-        :return: Tuple (x, y) of current mouse position.
-        """
-        return self.__pos_state
-
-    def __ev_mouse_down(self, ev):
-        """Mouse down events has triggered.
-
-        :param ev: Event object.
-        """
-        self.__button_state[ev.button + self.__button_index_offset] =\
-            self.__button_down_state
-
-    def __ev_mouse_up(self, ev):
-        """Mouse up events has triggered.
-
-        :param ev:
-        """
-        self.__button_state[ev.button + self.__button_index_offset] =\
-            not self.__button_down_state
-
-    def __ev_mouse_motion(self, ev):
-        """Mouse motion even has triggered.
-
-        :param ev:
-        """
-        self.__pos_state = ev.pos
 
 
 class EventHandler:
@@ -146,11 +87,11 @@ class EventHandler:
 class DragHandler(list):
     """List of draggable objects.
     """
-    def __init__(self, event_handler, mouse_handler, *draggable, drag_button=0,
+    def __init__(self, event_handler, *draggable, drag_button=0,
                  collision_func=pygame.sprite.collide_circle):
         list.__init__(self, *draggable)
         self.__event_handler = event_handler
-        self.__mouse_handler = mouse_handler
+        # self.__mouse_handler = mouse_handler
         self.__drag_button = drag_button
         self.__collision_func = collision_func
         self.__dragging = None
@@ -161,7 +102,8 @@ class DragHandler(list):
 
     @property
     def drag_button_state(self):
-        return self.__mouse_handler.buttons[self.__drag_button] is True
+        return pygame.mouse.get_pressed()[self.__drag_button] == 1
+        ##return self.__mouse_handler.buttons[self.__drag_button] is True
 
     def __ev_mouse_down(self, ev):
         # Creates a click sprite at the click point then checks it for

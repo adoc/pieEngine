@@ -12,13 +12,13 @@ if __name__ == "__main__":
     clock = pygame.time.Clock()
 
     bg = FillSurfaceEntity(screen.get_size(), fill_color=(255,0,0))
-    bg.surface_convert(screen)
+    bg.convert_ip(screen)
     bg.update()
     screen.blit(*bg.present())
 
     box = FillSurfaceEntity((512,256), fill_color=(0,255,0),
                      center=screen.get_rect().center)
-    box.surface_convert(screen)
+    box.convert_ip(screen)
     box.update()
     screen.blit(*box.present())
 

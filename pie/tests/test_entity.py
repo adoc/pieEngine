@@ -6,7 +6,7 @@ random = SystemRandom()
 import pygame
 
 from pie import entity
-from pie.entity import (next_entity_ord, BaseEntity, RectEntity,
+from pie.entity import (next_entity_ord, Identity, RectEntity,
                           SurfaceEntity, SurfaceRectEntity,
                           FillSurfaceEntity)
 
@@ -51,27 +51,27 @@ class TestBaseEntity(unittest.TestCase):
 
     def test_base_entity(self):
         for i in range(1, 100):
-            entity = BaseEntity()
+            entity = Identity()
             self.assertEqual(entity.ord, i+i-1)
             self.assertIsInstance(entity.id, uuid.UUID)
 
-            entity = BaseEntity(ord_factory=self.ord_factory)
+            entity = Identity(ord_factory=self.ord_factory)
             self.assertEqual(entity.ord, self.__ord)
 
-            entity = BaseEntity(id_factory=self.id_factory)
+            entity = Identity(id_factory=self.id_factory)
             self.assertEqual(entity.id, self.__id)
 
-            entity = BaseEntity(ord_factory=self.ord_factory,
+            entity = Identity(ord_factory=self.ord_factory,
                                 id_factory=self.id_factory)
             self.assertEqual(entity.ord, self.__ord)
             self.assertEqual(entity.id, self.__id)
 
     def test_update(self):
-        entity = BaseEntity()
+        entity = Identity()
         self.assertRaises(NotImplementedError, entity.update)
 
     def test_present(self):
-        entity = BaseEntity()
+        entity = Identity()
         self.assertRaises(NotImplementedError, entity.present)
 
 
@@ -277,7 +277,7 @@ class TestSurfaceEntity(TestRectBase):
             so = pygame.Surface(pr.size, 0, 8)
 
             s1 = SurfaceRectEntity(pr.size, pygame.HWSURFACE, 32)
-            s1.surface_convert(so)
+            s1.convert_ip(so)
 
             self.assertEqual(s1.surface.get_flags(), 0)
             self.assertEqual(s1.surface.get_bitsize(), 8)
@@ -290,7 +290,7 @@ class TestSurfaceEntity(TestRectBase):
             so = pygame.Surface(pr.size, pygame.SRCALPHA, 32)
 
             s1 = SurfaceRectEntity(pr.size, 0, 24)
-            s1.surface_convert_alpha(so)
+            s1.convert_alpha_ip(so)
 
             self.assertEqual(s1.surface.get_flags(), pygame.SRCALPHA)
             self.assertEqual(s1.surface.get_bitsize(), 32)

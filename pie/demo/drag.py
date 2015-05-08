@@ -5,11 +5,11 @@ import time
 
 import pygame
 
-from pie.entity import FillSpriteEntity, ImageSpriteEntity
+from pie.entity import FillSpriteEntity, BackgroundImageEntity
 from pie.engine import Engine
 
 
-class Demo(Engine):
+class Drag(Engine):
     def __init__(self, *args, **kwa):
         Engine.__init__(self, *args, **kwa)
         boxy = (FillSpriteEntity((200,200),
@@ -22,7 +22,9 @@ class Demo(Engine):
                                 fill_color=(0,0,255),
                                 center=(312, 312)))
 
-        self.render_group.add(boxy)
+        self.events.bind(pygame.KEYDOWN, lambda ev: self.stop())
+
+        self.render_group.add(*boxy)
         self.drag_handler.extend(boxy)
 
 
@@ -34,9 +36,12 @@ if __name__ == "__main__":
                                      pygame.ASYNCBLIT |
                                      pygame.RESIZABLE)
 
-    bf = lambda: ImageSpriteEntity(
+    bf = lambda: BackgroundImageEntity(
                                 pygame.image.load("assets/bg1.png").convert())
 
-    game = Demo(screen_factory=sf, background_factory=bf)
+    game = Drag(screen_factory=sf, background_factory=bf)
+    game2 = Drag(screen_factory=sf, background_factory=bf)
 
-    print(game.start())
+    if game.start():
+        print("DIID")
+        game2.start()

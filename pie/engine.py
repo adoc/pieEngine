@@ -5,10 +5,11 @@ Game Engine.
 import pygame.sprite
 
 from pie.base import MRunnable
-from pie.entity import BaseEntity
+from pie.math import vect_move
+from pie.entity import Identity
 from pie.asset import AssetHandler
-from pie.event import DragHandler, EventHandler, MouseState
-from pie.entity import FillSurfaceEntity
+from pie.event import DragHandler, EventHandler
+from pie.entity import BackgroundFillEntity
 from pie.util import fallback_factory
 
 
@@ -51,25 +52,36 @@ class Renderer:
 
         if non_static_background:
             self.render = self.__render_non_static
+            self.clear = self.__clear_non_static
+
+    def __clear_static(self):
+        self.__group.clear(self.__screen, self.__background.group_clear)
+
+    def __clear_non_static(self):
+        self.__screen.blit(self.__background.image, self.__background.rect)
 
     def __render_static(self):
-        # Clear the dirty rects using Entity callback.
-        self.__group.clear(self.__screen, self.__background.group_clear)
-        pygame.display.update(
-                self.__group.draw(
-                    self.__screen))
+        pygame.display.update(self.__group.draw(self.__screen))
 
     def __render_non_static(self):
-        self.__screen.blit(self.__background.image, self.__background.rect)
         self.__group.draw(self.__screen)
         pygame.display.flip()
 
-    def init(self):
-        self.__screen.blit(self.__background.image, self.__background.rect)
+    def init(self, offset=None):
+        if offset:
+            self.__background.move_ip(*offset)
+            for sprite in self.__group:
+                sprite.move_ip(*offset)
+
+        self.__clear_non_static()
+        self.__render_non_static()
         pygame.display.flip()
 
     def render(self):
         return self.__render_static()
+
+    def clear(self):
+        return self.__clear_static()
 
 
 
@@ -99,10 +111,8 @@ class Renderer:
 
 
 
-
-
 # TODO: Abstract out debug.
-class Engine(BaseEntity, MRunnable):
+class Engine(Identity, MRunnable):
     """Game enging base class. Any game implementations will subclass
     from this.
     """
@@ -120,7 +130,7 @@ class Engine(BaseEntity, MRunnable):
         :param BackGround background: ``Background`` instance
         :return:
         """
-        BaseEntity.__init__(self)
+        Identity.__init__(self)
         MRunnable.__init__(self, auto_start=auto_start)
 
         self.__debug = debug
@@ -137,7 +147,7 @@ class Engine(BaseEntity, MRunnable):
                                         self.__default_bg_surface_factory)
 
         self.__render_group = fallback_factory(render_group_factory,
-                                               pygame.sprite.RenderUpdates)
+                                               pygame.sprite.OrderedUpdates)
 
         self.__renderer = Renderer(self.__screen, self.__background,
                                    self.__render_group,
@@ -146,15 +156,17 @@ class Engine(BaseEntity, MRunnable):
         # Set up subsystems.
         self.__assets = AssetHandler(self.__screen)
         self.__events = EventHandler() # Allow us to bind to events.
-        self.__mouse = MouseState(self.events) # Tracks mouse state using
-                                            # the events handler.
-        self.__drag_handler = DragHandler(self.events, self.mouse)
+        self.__drag_handler = DragHandler(self.events)
 
         # Bind events.
-        self.__events.bind(pygame.QUIT, lambda ev: self.stop())
+        self.__events.bind(pygame.QUIT, self.__ev_quit)
         self.__events.bind(pygame.VIDEORESIZE, self.__ev_resize)
 
         self.__end_state = True
+
+    def __ev_quit(self, _):
+        self.__end_state = False
+        self.stop()
 
     @staticmethod
     def __default_screen_factory():
@@ -163,11 +175,10 @@ class Engine(BaseEntity, MRunnable):
                                         info.current_h // 2))
 
     def __default_bg_surface_factory(self):
-        return FillSurfaceEntity(screen_factory=self.__screen.copy)
+        return BackgroundFillEntity(screen_factory=self.__screen.copy)
 
     def __ev_resize(self, event):
-        # TODO: Broken with image backgrounds.
-        """Resize events callback.
+        """Resize the display screen and...
 
         :param event:
         :param _:
@@ -176,12 +187,12 @@ class Engine(BaseEntity, MRunnable):
         new_size = event.dict['size']
         surface_size = self.__screen.get_size()
         if new_size != surface_size:
-            self.__screen = pygame.display.set_mode(event.dict['size'],
+            self.__screen = pygame.display.set_mode(new_size,
                                                     self.__screen.get_flags(),
                                                     self.__screen.get_bitsize())
-            self.__background.reset(surface_factory=self.__screen.copy)
-            self.init()
-            # self.__debug_surface.reset(surface_factory=self.__screen.copy)
+            # TODO: This centers everything. We can easily add options.
+            self.init(offset=vect_move(self.__screen.get_rect().center,
+                                       self.__background.rect.center))
         self.__screen_width, self.__screen_height = self.__screen.get_size()
 
     @property
@@ -197,10 +208,6 @@ class Engine(BaseEntity, MRunnable):
         return self.__events
 
     @property
-    def mouse(self):
-        return self.__mouse
-
-    @property
     def drag_handler(self):
         return self.__drag_handler
 
@@ -212,10 +219,10 @@ class Engine(BaseEntity, MRunnable):
     def screen_height(self):
         return self.__screen_height
 
-    def init(self):
+    def init(self, offset=None):
         """
         """
-        self.__renderer.init()
+        self.__renderer.init(offset=offset)
 
     def update(self):
         """
@@ -227,6 +234,11 @@ class Engine(BaseEntity, MRunnable):
         """
         """
         return self.__clock.tick()
+
+    def clear(self):
+        """
+        """
+        self.__renderer.clear()
 
     def render(self):
         """
@@ -243,6 +255,7 @@ class Engine(BaseEntity, MRunnable):
         while not self.stopped:
             self.update()
             self.throttle()
+            self.clear()
             self.render()
 
         return self.__end_state

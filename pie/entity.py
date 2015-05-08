@@ -1,4 +1,5 @@
 # TODO: Module needs to refactor away from "reset" methods. .reset may not be needed.
+# Bit of overkill but heart is in the right place!
 
 import uuid
 
@@ -44,7 +45,7 @@ def _reset_entity_ord(confirm=False):
         __entity_ord = 0
 
 
-class BaseEntity:
+class Identity:
     """
     """
 
@@ -87,23 +88,13 @@ class BaseEntity:
                                   "implemented.")
 
 
-class RectEntity(BaseEntity):
+class RectEntity:
     """Container Entity for a ``pygame.Rect`` object. Provides
     ``rect`` property to get the ``Rect`` object. Also provides a
     ``reset`` method to replace the current ``Rect``.
     """
 
     def __init__(self, *rect_args, rect_factory=None):
-        super(RectEntity, self).__init__()
-        self.reset(*rect_args, rect_factory=rect_factory)
-
-    @property
-    def rect(self):
-        """Returns the ``Rect`` object.
-        """
-        return self.__rect
-
-    def reset(self, *rect_args, rect_factory=None):
         """Reset the ``Rect`` object.
 
         :param *rect_args: passed directly to a ``pygame.Rect``
@@ -111,33 +102,40 @@ class RectEntity(BaseEntity):
         :param rect_factory: Rect factory function. This takes
             precedence over ``*rect_args``
         """
+
         self.__rect = (callable(rect_factory) and rect_factory() or
                        pygame.Rect(*rect_args))
         self.__rect.normalize()
 
-    def rect_move(self, x, y):
+    @property
+    def rect(self):
+        """Returns the ``Rect`` object.
+        """
+        return self.__rect
+
+    def move_ip(self, x, y):
         self.__rect = self.__rect.move(x, y)
 
-    def rect_inflate(self, x, y):
+    def inflate_ip(self, x, y):
         self.__rect = self.__rect.inflate(x, y)
 
-    def rect_clamp(self, rect):
+    def clamp_ip(self, rect):
         self.__rect = self.__rect.clamp(rect)
 
-    def rect_clip(self, rect):
+    def clip_ip(self, rect):
         self.__rect = self.__rect.clip(rect)
 
-    def rect_union(self, rect):
+    def union_ip(self, rect):
         self.__rect = self.__rect.union(rect)
 
-    def rect_unionall(self, rect_sequence):
+    def unionall_ip(self, rect_sequence):
         self.__rect = self.__rect.unionall(rect_sequence)
 
-    def rect_fit(self, rect):
+    def fit_ip(self, rect):
         self.__rect = self.__rect.fit(rect)
 
 
-class SurfaceEntity(BaseEntity):
+class SurfaceEntity:
     """
     """
 
@@ -147,8 +145,8 @@ class SurfaceEntity(BaseEntity):
         :param surface_factory:
         :return:
         """
-        BaseEntity.__init__(self)
-        self.reset(*surface_args, surface_factory=surface_factory)
+        self.__surface = (callable(surface_factory) and surface_factory() or
+                          pygame.Surface(*surface_args))
 
     @property
     def surface(self):
@@ -160,144 +158,114 @@ class SurfaceEntity(BaseEntity):
         """
         return self.surface
 
-    def reset(self, *surface_args, surface_factory=None):
-        self.__surface = (callable(surface_factory) and surface_factory() or
-                          pygame.Surface(*surface_args))
+    def convert_ip(self, *conver_args, **conver_kwa):
+        self.__surface = self.__surface.convert(*conver_args, **conver_kwa)
 
-    def surface_convert(self, *args, **kwa):
-        self.__surface = self.__surface.convert(*args, **kwa)
+    def convert_alpha_ip(self, *convert_args, **convert_kwa):
+        self.__surface = self.__surface.convert_alpha(*convert_args,
+                                                      **convert_kwa)
 
-    def surface_convert_alpha(self, *args, **kwa):
-        self.__surface = self.__surface.convert_alpha(*args, **kwa)
-
-    def surface_transform(self, xform_func, *xform_args, **xform_kwa):
-        self.reset(surface_factory=lambda: xform_func(self.__surface,
-                                                      *xform_args, **xform_kwa))
+    def transform_ip(self, xform_func, *xform_args, **xform_kwa):
+        self.__surface = xform_func(self.__surface, *xform_args, **xform_kwa)
 
 
-class SurfaceRectEntity(RectEntity, SurfaceEntity):
+class SurfaceRectEntity(SurfaceEntity, RectEntity):
     def __init__(self, *surface_args, surface_factory=None, **rect_kwa):
-        BaseEntity.__init__(self)
-        self.reset(*surface_args,
-                               surface_factory=surface_factory, **rect_kwa)
+        SurfaceEntity.__init__(self, *surface_args,
+                               surface_factory=surface_factory)
+        self.rect_set_surface(**rect_kwa)
 
-    def reset(self, *surface_args, surface_factory=None, **rect_kwa):
-        SurfaceEntity.reset(self, *surface_args,
-                                    surface_factory=surface_factory)
-        RectEntity.reset(self, self.surface.get_rect(**rect_kwa))
-
-    def present(self):
+    @property
+    def blit_args(self):
         return (self.surface, self.rect)
 
-    # Override rect methods that will transform the final surface.
-    # TODO: Update with transforms!
-    def rect_inflate(self, x, y):
-        self.__rect = self.__rect.inflate(x, y)
+    def rect_set_surface(self, **rect_kwa):
+        RectEntity.__init__(self, self.surface.get_rect(**rect_kwa))
 
-    def rect_clamp(self, rect):
-        self.__rect = self.__rect.clamp(rect)
+    def transform_ip(self, xform_func, *xform_args, **xform_kwa):
+        old_rect = self.surface.get_rect().center
+        SurfaceEntity.transform_ip(self, xform_func, *xform_args, **xform_kwa)
+        self.rect_set_surface(center=old_rect.center)
 
-    def rect_clip(self, rect):
-        self.__rect = self.__rect.clip(rect)
 
-    def rect_union(self, rect):
-        self.__rect = self.__rect.union(rect)
+class SpriteSurfaceEntity(pygame.sprite.Sprite, Identity, SurfaceRectEntity):
+    def __init__(self, *surface_args, surface_factory=None,
+                 sprite_groups=(), **surface_rect_kwa):
+        pygame.sprite.Sprite.__init__(self, *sprite_groups)
+        Identity.__init__(self)
+        SurfaceRectEntity.__init__(self, *surface_args,
+                                  surface_factory=surface_factory,
+                                  **surface_rect_kwa)
 
-    def rect_unionall(self, rect_sequence):
-        self.__rect = self.__rect.unionall(rect_sequence)
 
-    def rect_fit(self, rect):
-        self.__rect = self.__rect.fit(rect)
+class DirtySpriteEntity(pygame.sprite.DirtySprite, Identity, SurfaceRectEntity):
+    def __init__(self, *surface_args, surface_factory=None,
+                 sprite_groups=(), **surface_rect_kwa):
+        pygame.sprite.DirtySprite.__init__(self, *sprite_groups)
+        Identity.__init__(self)
+        SurfaceRectEntity.__init__(self, *surface_args,
+                                  surface_factory=surface_factory,
+                                  **surface_rect_kwa)
+
+
+class GroupClear:
+    """Provides interface hook for Group draw or clear calls.
+    """
+
+    def group_clear(self, surface, rect):
+        # TODO: Keep an eye on this function. may not work in all cases...
+        surface_topleft = pygame.math.Vector2(surface.get_rect().topleft)
+        self_topleft = pygame.math.Vector2(self.rect.topleft)
+        vect_move = surface_topleft - self_topleft
+        surface.blit(self.image, rect, area=rect.move(*vect_move))
 
 
 # User Implementable Classes
-class PointEntity(pygame.sprite.Sprite, RectEntity):
+class PointEntity(pygame.sprite.Sprite, Identity, RectEntity):
     def __init__(self, pos, radius=0):
+        Identity.__init__(self)
         RectEntity.__init__(self, pos, (0, 0))
-        self.radius = radius
+        self.radius = self.rect.width * self.rect.height // 2
 
 
-class SpriteEntity(pygame.sprite.Sprite, SurfaceRectEntity):
-    def __init__(self, *surface_args, surface_factory=None,
-                 sprite_groups=[], **surface_rect_kwa):
-        BaseEntity.__init__(self)
-        SurfaceRectEntity.reset(*surface_args,
-                                        surface_factory=surface_factory,
-                                        **surface_rect_kwa)
-        pygame.sprite.Sprite.__init__(*sprite_groups)
-
-
-class DirtySpriteEntity(pygame.sprite.DirtySprite, SurfaceRectEntity):
-    def __init__(self, *surface_args, surface_factory=None,
-                 sprite_groups=[], **surface_rect_kwa):
-        BaseEntity.__init__(self)
-        SurfaceRectEntity.reset(self, *surface_args,
-                                        surface_factory=surface_factory,
-                                        **surface_rect_kwa)
-        pygame.sprite.DirtySprite.__init__(self, *sprite_groups)
-
-
-class DrawSurfaceEntity(pygame.sprite.Sprite, SurfaceRectEntity):
-    """A surface used generally for ``pygame.draw`` operations.
-    """
-    def __init__(self, *surface_args, surface_factory=None,
-                 sprite_groups=[], **surface_rect_kwa):
-        BaseEntity.__init__(self)
-        SurfaceRectEntity.reset(self, *surface_args,
-                                        surface_factory=surface_factory,
-                                        **surface_rect_kwa)
-        pygame.sprite.Sprite.__init__(self, *sprite_groups)
-
-
-
-class FillSurfaceEntity(SurfaceRectEntity):
+class FillSpriteEntity(SpriteSurfaceEntity):
     """A static solid color surface.
     """
     def __init__(self, *surface_args, surface_factory=None,
-                 fill_color=pygame.Color(0, 0, 0), **rect_kwa):
-        self.reset(*surface_args, surface_factory=surface_factory,
-                   fill_color=fill_color, **rect_kwa)
-
-    def reset(self, *surface_args, surface_factory=None,
-              fill_color=pygame.Color(0, 0, 0), **rect_kwa):
-        SurfaceRectEntity.reset(self, *surface_args,
-                                surface_factory=surface_factory, **rect_kwa)
+                 fill_color=pygame.Color(0, 0, 0), sprite_groups=[], **rect_kwa):
+        SpriteSurfaceEntity.__init__(self, *surface_args,
+                                     surface_factory=surface_factory,
+                                     sprite_groups=sprite_groups, **rect_kwa)
         self.__fill_color = fill_color
+        self.fill()
+
+    def fill(self, fill_color=None):
+        self.__fill_color = fill_color or self.__fill_color
         self.surface.fill(self.__fill_color)
 
 
-class FillSpriteEntity(SpriteEntity):
-    def __init__(self, *surface_args, surface_factory=None,
-                 fill_color=pygame.Color(0, 0, 0), sprite_groups=[],
+class BackgroundFillEntity(FillSpriteEntity, GroupClear):
+    pass
+
+
+class ImageSpriteEntity(SpriteSurfaceEntity):
+    def __init__(self, *surface, sprite_groups=[], surface_factory=None,
                  **rect_kwa):
-        BaseEntity.__init__(self)
-        self.reset(*surface_args, surface_factory=surface_factory,
-              fill_color=fill_color, **rect_kwa)
-        pygame.sprite.Sprite.__init__(self, *sprite_groups)
-
-    def reset(self, *surface_args, surface_factory=None,
-                 fill_color=pygame.Color(0, 0, 0), sprite_groups=[],
-                 **rect_kwa):
-        SpriteEntity.reset(self, *surface_args,
-                           **rect_kwa)
-        self.__fill_color = fill_color
-        self.surface.fill(self.__fill_color)
+        SpriteSurfaceEntity.__init__(self,
+                                     surface_factory=surface and
+                                            (lambda: surface[0]) or
+                                           surface_factory,
+                                     sprite_groups=sprite_groups, **rect_kwa)
 
 
-class ImageSpriteEntity(SpriteEntity):
-    def __init__(self, *surface, sprite_groups=[], surface_factory=None, **rect_args):
-        BaseEntity.__init__(self)
-        self.reset(surface_factory=lambda: surface and surface[0] or
-                                           surface_factory, **rect_args)
-
-    def group_clear(self, surface, rect):
-        surface.blit(self.image, rect, area=rect)
+class BackgroundImageEntity(ImageSpriteEntity, GroupClear):
+    pass
 
 
 class AnimatedEntity(pygame.sprite.Sprite, RectEntity):
     def __init__(self, frames, sprite_groups=[], autostart=True,
                  animation_cls=AnimationLoop, **surface_rect_kwa):
-        BaseEntity.__init__(self)
+        Identity.__init__(self)
         # TODO: get_largest_frame may not be needed if we enforce animations to have a constant frame size. (which we should)
         RectEntity.reset(self,
                          get_largest_frame(frames).get_rect(**surface_rect_kwa))
@@ -350,7 +318,7 @@ class AnimatedEntity(pygame.sprite.Sprite, RectEntity):
         return (self.surface, self.rect)
 
 
-class CompositeEntity(BaseEntity):
+class CompositeEntity(Identity):
     def __init__(self):
         pass
 

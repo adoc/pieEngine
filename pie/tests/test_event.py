@@ -1,17 +1,6 @@
 import unittest
 
-from pie.event import MouseState, EventHandler, DragHandler
-
-
-class TestMouseState(unittest.TestCase):
-    def test__init__(self):
-        assert False
-
-    def test_prop_buttons(self):
-        assert False
-
-    def test_prop_pos(self):
-        assert False
+from pie.event import EventHandler, DragHandler
 
 
 class TestEventHandler(unittest.TestCase):
