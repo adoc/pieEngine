@@ -8,8 +8,7 @@ import random
 import pygame
 from pygame.locals import *
 
-from pie.entity import AnimatedEntity
-
+from pie.entity.animated import Animated
 from pie_examples.ameiosis.game import Ameiosis as AmeosisBase
 
 
@@ -52,7 +51,7 @@ class Ameosis(AmeosisBase):
         pos = (random.random()*self.screen_width-20,
                random.random()*self.screen_height-20)
 
-        spr = AnimatedEntity(self.assets.animations['bomber1'], center=pos)
+        spr = Animated(self.assets.animations['bomber1'], center=pos)
 
         team = self.spawn_team
         self._armies_sprites[team].add(spr)

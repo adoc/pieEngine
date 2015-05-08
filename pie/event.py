@@ -2,7 +2,8 @@ import pygame
 import pygame.math
 
 from pie.util import OrderedDefaultDict
-from pie.entity import PointEntity
+from pie.entity.primitive import Point
+from pie.math import vect_diff
 
 
 __all__ = ("EventHandler",
@@ -87,35 +88,27 @@ class EventHandler:
 class DragHandler(list):
     """List of draggable objects.
     """
-    def __init__(self, event_handler, *draggable, drag_button=0,
-                 collision_func=pygame.sprite.collide_circle):
+    def __init__(self, event_handler, *draggable, drag_button=0):
         list.__init__(self, *draggable)
         self.__event_handler = event_handler
-        # self.__mouse_handler = mouse_handler
         self.__drag_button = drag_button
-        self.__collision_func = collision_func
+        # self.__collision_func = collision_func
         self.__dragging = None
 
         event_handler.bind(pygame.MOUSEBUTTONDOWN, self.__ev_mouse_down)
         event_handler.bind(pygame.MOUSEBUTTONUP, self.__ev_mouse_up)
         event_handler.bind(pygame.MOUSEMOTION, self.__ev_mouse_motion)
 
-    @property
-    def drag_button_state(self):
-        return pygame.mouse.get_pressed()[self.__drag_button] == 1
-        ##return self.__mouse_handler.buttons[self.__drag_button] is True
-
     def __ev_mouse_down(self, ev):
         # Creates a click sprite at the click point then checks it for
         # collisions against all the other sprites in this handler.
         if self.drag_button_state:
-            self.__click_sprite = PointEntity((ev.pos[0], ev.pos[1]))
+            self.__click_sprite = Point((ev.pos[0], ev.pos[1]))
             for sprite in self:
-                if self.__collision_func(self.__click_sprite, sprite):
+                if sprite.collide_func(self.__click_sprite, sprite):
                     self.__dragging = (sprite,
-                                       pygame.math.Vector2(sprite.rect.topleft) -
-                                       pygame.math.Vector2(
-                                           self.__click_sprite.rect.topleft))
+                                       vect_diff(sprite.rect.topleft,
+                                            self.__click_sprite.rect.topleft))
 
     def __ev_mouse_up(self, ev):
         self.__dragging = None
@@ -123,6 +116,10 @@ class DragHandler(list):
     def __ev_mouse_motion(self, ev):
         if self.__dragging and self.drag_button_state:
             self.__click_sprite.rect.topleft = (ev.pos[0], ev.pos[1])
+
+    @property
+    def drag_button_state(self):
+        return pygame.mouse.get_pressed()[self.__drag_button] == 1
 
     def update(self):
         if self.__dragging:

@@ -5,11 +5,11 @@ Game Engine.
 import pygame.sprite
 
 from pie.base import MRunnable
-from pie.math import vect_move
-from pie.entity import Identity
+from pie.math import vect_diff
+from pie.entity import MIdentity
 from pie.asset import AssetHandler
 from pie.event import DragHandler, EventHandler
-from pie.entity import BackgroundFillEntity
+from pie.entity.background import BackgroundFill
 from pie.util import fallback_factory
 
 
@@ -112,7 +112,7 @@ class Renderer:
 
 
 # TODO: Abstract out debug.
-class Engine(Identity, MRunnable):
+class Engine(MIdentity, MRunnable):
     """Game enging base class. Any game implementations will subclass
     from this.
     """
@@ -130,7 +130,8 @@ class Engine(Identity, MRunnable):
         :param BackGround background: ``Background`` instance
         :return:
         """
-        Identity.__init__(self)
+
+        MIdentity.__init__(self)
         MRunnable.__init__(self, auto_start=auto_start)
 
         self.__debug = debug
@@ -175,7 +176,7 @@ class Engine(Identity, MRunnable):
                                         info.current_h // 2))
 
     def __default_bg_surface_factory(self):
-        return BackgroundFillEntity(screen_factory=self.__screen.copy)
+        return BackgroundFill(screen_factory=self.__screen.copy)
 
     def __ev_resize(self, event):
         """Resize the display screen and...
@@ -184,6 +185,7 @@ class Engine(Identity, MRunnable):
         :param _:
         :return:
         """
+
         new_size = event.dict['size']
         surface_size = self.__screen.get_size()
         if new_size != surface_size:
@@ -191,7 +193,7 @@ class Engine(Identity, MRunnable):
                                                     self.__screen.get_flags(),
                                                     self.__screen.get_bitsize())
             # TODO: This centers everything. We can easily add options.
-            self.init(offset=vect_move(self.__screen.get_rect().center,
+            self.init(offset=vect_diff(self.__screen.get_rect().center,
                                        self.__background.rect.center))
         self.__screen_width, self.__screen_height = self.__screen.get_size()
 

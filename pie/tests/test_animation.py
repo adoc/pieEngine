@@ -2,7 +2,7 @@ import unittest
 
 import pygame
 
-from pie.entity import AnimatedEntity
+from pie.entity.animated import Animated
 from pie.animation import AnimationLoop
 from pie.base import MRunnable
 
@@ -52,7 +52,7 @@ class TestAnimationLoop(unittest.TestCase):
 
     def test_update(self):
         frames = [pygame.Surface((100,100))] * 30
-        ae = AnimatedEntity(frames, autostart=False,
+        ae = Animated(frames, autostart=False,
                             animation_cls=AnimationLoop)
 
         a = AnimationLoop(ae)
