@@ -232,6 +232,9 @@ class Engine(MIdentity, MRunnable):
         self.events.update()
         self.drag_handler.update()
 
+        for sprite in self.__render_group:
+            sprite.update()
+
     def throttle(self):
         """
         """
