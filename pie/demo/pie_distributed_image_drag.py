@@ -1,6 +1,7 @@
 """pieEngine - Pygame Engine
 """
 
+from threading import Timer
 
 import pygame
 
@@ -17,17 +18,21 @@ class Demo(Engine):
 
         image_surf = pygame.image.load("assets/bomber10000.png").convert_alpha()
         image_surf = pygame.transform.scale(image_surf, (64,64))
-        images = [Image(image_surf.copy(), center=(512,256)) for _ in range(10)]
+        images = [Image(image_surf, center=(512,256)) for _ in range(10)]
 
         boxy = DistributedOnce(*images)
 
         self.boxy = boxy
-        self.render_group.add(boxy)
+
+        self.render_group.add(boxy) # Adding a group here, but pygame breaks this down in to individual sprites, therefore breaking any sub_group functionality.
         self.drag_handler.append(boxy)
 
     def update(self):
         Engine.update(self)
         self.boxy.update()
+
+
+
 
 
 if __name__ == "__main__":
@@ -39,6 +44,12 @@ if __name__ == "__main__":
     bf = lambda: BackgroundImage(
                         pygame.image.load("assets/bg2.png").convert())
 
+
+
     game = Demo(screen_factory=sf, background_factory=bf)
+    t = Timer(10, game.stop)
+    t.start()
 
     game.start()
+
+    t.join()

@@ -5,11 +5,11 @@ Game Engine.
 import pygame.sprite
 
 from pie.base import MRunnable
-from pie.math import vect_diff
 from pie.entity import MIdentity
+from pie.entity.background import BackgroundFill
 from pie.asset import AssetHandler
 from pie.event import DragHandler, EventHandler
-from pie.entity.background import BackgroundFill
+from pie.math import vect_diff
 from pie.util import fallback_factory
 
 
@@ -41,18 +41,24 @@ class FpsClock:
     def get_fps(self):
         return self.__clock.get_fps()
 
-
+# TODO: Refactoring [#3]
 class Renderer:
     """
     """
     def __init__(self, screen, background, group, non_static_background=False):
         self.__screen = screen
-        self.__background = background
-        self.__group = group
+
+        self.__background = background # How do we handle backgrounds?? [#3]
+        self.__group = group # Does this stay a group of sprites only? [#3]
+        # Do we add the "list of groups" abstract here? [#3]
+
 
         if non_static_background:
             self.render = self.__render_non_static
             self.clear = self.__clear_non_static
+        else:
+            self.render = self.__render_static
+            self.clear = self.__clear_static
 
     def __clear_static(self):
         self.__group.clear(self.__screen, self.__background.group_clear)
@@ -77,42 +83,8 @@ class Renderer:
         self.__render_non_static()
         pygame.display.flip()
 
-    def render(self):
-        return self.__render_static()
 
-    def clear(self):
-        return self.__clear_static()
-
-
-
-        # self._debug_font = pygame.font.Font(None, 18)
-        # self._debug_pos = (8, 8)
-        # self._debug_lines = []
-
-
-    # # TODO: Refactor in to debug mixin.
-    # def draw_debug(self, tick_time=0):
-    #     self.__debug_surface.image.fill((0,0,0))
-    #     for n, line in enumerate(reversed(self._debug_lines)):
-    #         pos = list(self._debug_pos)
-    #         pos[1] = n * self._debug_font.get_linesize() + self._debug_pos[1]
-    #         self.__debug_surface.image.blit(
-    #             self._debug_font.render(*line),
-    #             pos)
-    #     if tick_time:
-    #         pos[1] += self._debug_font.get_linesize() + self._debug_pos[1]
-    #         self.__debug_surface.image.blit(
-    #             self._debug_font.render("Tick: %.4f" % tick_time, 1, (240, 240, 240)),
-    #             pos
-    #         )
-    #     self._debug_lines = []
-
-        # self._debug_lines.append(("FPS: %s" % (self.__clock.get_fps()), 1, (240, 240, 240)))
-
-
-
-# TODO: Abstract out debug.
-class Engine(MIdentity, MRunnable):
+class Engine(MRunnable, MIdentity):
     """Game enging base class. Any game implementations will subclass
     from this.
     """
@@ -130,9 +102,8 @@ class Engine(MIdentity, MRunnable):
         :param BackGround background: ``Background`` instance
         :return:
         """
-
-        MIdentity.__init__(self)
         MRunnable.__init__(self, auto_start=auto_start)
+        MIdentity.__init__(self)
 
         self.__debug = debug
         self.__target_fps = target_fps
@@ -156,7 +127,7 @@ class Engine(MIdentity, MRunnable):
 
         # Set up subsystems.
         self.__assets = AssetHandler(self.__screen)
-        self.__events = EventHandler() # Allow us to bind to events.
+        self.__events = EventHandler()
         self.__drag_handler = DragHandler(self.events)
 
         # Bind events.
@@ -193,15 +164,9 @@ class Engine(MIdentity, MRunnable):
             self.__screen = pygame.display.set_mode(new_size,
                                                     self.__screen.get_flags(),
                                                     self.__screen.get_bitsize())
-            # TODO: This centers everything. We can easily add options.
             self.init(offset=vect_diff(self.__screen.get_rect().center,
                                        old_center))
         self.__screen_width, self.__screen_height = self.__screen.get_size()
-
-    # @property
-    # def screen(self):
-    #     # Debug only
-    #     return self.__screen
 
     @property
     def render_group(self):
