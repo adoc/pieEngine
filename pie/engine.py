@@ -198,10 +198,10 @@ class Engine(MIdentity, MRunnable):
                                        old_center))
         self.__screen_width, self.__screen_height = self.__screen.get_size()
 
-    @property
-    def screen(self):
-        # Debug only
-        return self.__screen
+    # @property
+    # def screen(self):
+    #     # Debug only
+    #     return self.__screen
 
     @property
     def render_group(self):

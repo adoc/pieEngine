@@ -23,7 +23,7 @@ class RadialDistribution:
 
 class Distributed(pygame.sprite.OrderedUpdates, MIdentity, MRect):
     def __init__(self, *entities,
-                 distribute_factory=lambda g: radial_distribution(g, 50),
+                 distribute_factory=lambda g: radial_distribution(g, 100),
                  collide_func=pygame.sprite.collide_rect):
         self.__rect_init = False
         self.__distribute_factory = distribute_factory

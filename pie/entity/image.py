@@ -10,5 +10,3 @@ class Image(ESprite):
                          surface_factory=surface and (
                          lambda: surface[0]) or surface_factory,
                          sprite_groups=sprite_groups, **rect_kwa)
-
-
