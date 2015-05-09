@@ -178,6 +178,7 @@ class MSurfaceRect(MSurface, MRect):
         self.rect_set_surface(center=old_rect.center)
 
 
+# TODO: Do we want to implement Sprite, MIdentity and MSurfaceRect at this point?
 class ESprite(pygame.sprite.Sprite, MIdentity, MSurfaceRect):
     def __init__(self, *surface_args, surface_factory=None,
                  sprite_groups=(), collide_func=pygame.sprite.collide_rect,
@@ -213,7 +214,7 @@ class EDirtySprite(pygame.sprite.DirtySprite, MIdentity, MSurfaceRect):
 class MAnimated:
     def __init__(self, count=0, interval=1.0, start=0,
                  end=0, autostart=True,
-                 animation_factory=lambda: AnimationLoop()):
+                 animation_factory=lambda: AnimationLoop(bounce=True)):
         """Mixin for animated Entity classes. The ``frame_index``
         property can be used
 
@@ -281,7 +282,7 @@ class MAnimated:
     # Transport methods
     def advance(self):
         self.__index += self.interval
-        self.__index %= self.count
+        # self.__index %= self.count
 
     def flip(self):
         self.__interval = -self.interval

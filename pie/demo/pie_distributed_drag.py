@@ -8,7 +8,7 @@ import pygame
 from pie.entity.background import BackgroundImage
 from pie.entity.primitive import Fill
 from pie.entity.image import Image
-from pie.entity.composite import Distributed
+from pie.entity.composite import DistributedOnce
 from pie.engine import Engine
 
 
@@ -21,7 +21,7 @@ class Demo(Engine):
                                    random.randint(0,255),
                                    random.randint(0,255))) for _ in range(10)]
 
-        boxy = Distributed(*images)
+        boxy = DistributedOnce(*images)
 
         self.boxy = boxy
         self.render_group.add(boxy)

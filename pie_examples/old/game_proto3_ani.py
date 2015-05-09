@@ -8,7 +8,7 @@ import random
 import pygame
 from pygame.locals import *
 
-from pie.entity.animated import Animated
+from pie.entity.animated import SurfaceSequence
 from pie_examples.ameiosis.game import Ameiosis as AmeosisBase
 
 
@@ -51,7 +51,7 @@ class Ameosis(AmeosisBase):
         pos = (random.random()*self.screen_width-20,
                random.random()*self.screen_height-20)
 
-        spr = Animated(self.assets.animations['bomber1'], center=pos)
+        spr = SurfaceSequence(self.assets.animations['bomber1'], center=pos)
 
         team = self.spawn_team
         self._armies_sprites[team].add(spr)

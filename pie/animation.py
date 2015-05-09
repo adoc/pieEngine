@@ -8,7 +8,7 @@ class Animation(MRunnable):
 
 
 class AnimationLoop(Animation):
-    def __init__(self, bounce=True, once=False, auto_start=False):
+    def __init__(self, bounce=False, once=False, auto_start=False):
         MRunnable.__init__(self, auto_start=auto_start)
         self.__bounce = bounce
         self.__once = once
