@@ -334,9 +334,92 @@ class TestFill(TestRectBase):
             self.assertEqual(byte, 255)
 
 
-class TestAnimatedEntity(unittest.TestCase):
-    def test_init(self):
-        assert False
+class TestMAnimated(unittest.TestCase):
+    def test_init_and_props(self):
+        # Test "regular args.
+        a = pie.entity.MAnimated()
+
+        self.assertEqual(a.start, 0)
+        self.assertEqual(a.end, -1)
+        self.assertEqual(a.count, 0)
+        self.assertEqual(a.playing_count, 0)
+        self.assertEqual(a.interval, 1)
+        self.assertEqual(a.index, 0)
+        self.assertTrue(a.at_start)
+        self.assertTrue(a.at_end)
+        self.assertFalse(a.is_reversed)
+        self.assertTrue(a.is_forward)
+
+        a = pie.entity.MAnimated(count=60)
+
+        self.assertEqual(a.start, 0)
+        self.assertEqual(a.end, 59)
+        self.assertEqual(a.count, 60)
+        self.assertEqual(a.playing_count, 60)
+        self.assertEqual(a.interval, 1)
+        self.assertEqual(a.index, 0)
+        self.assertTrue(a.at_start)
+        self.assertFalse(a.at_end)
+        self.assertFalse(a.is_reversed)
+        self.assertTrue(a.is_forward)
+
+        a = pie.entity.MAnimated(count=60, interval=-1)
+
+        self.assertEqual(a.start, 0)
+        self.assertEqual(a.end, 59)
+        self.assertEqual(a.count, 60)
+        self.assertEqual(a.playing_count, 60)
+        self.assertEqual(a.interval, -1)
+        self.assertEqual(a.index, 0)
+        self.assertTrue(a.at_start)
+        self.assertFalse(a.at_end)
+        self.assertTrue(a.is_reversed)
+        self.assertFalse(a.is_forward)
+
+        a = pie.entity.MAnimated(count=60, interval=-1,
+                                 start=10)
+
+        self.assertEqual(a.start, 10)
+        self.assertEqual(a.end, 59)
+        self.assertEqual(a.count, 60)
+        self.assertEqual(a.playing_count, 50)
+        self.assertEqual(a.interval, -1)
+        self.assertEqual(a.index, 10)
+        self.assertTrue(a.at_start)
+        self.assertFalse(a.at_end)
+        self.assertTrue(a.is_reversed)
+        self.assertFalse(a.is_forward)
+
+        a = pie.entity.MAnimated(count=60, interval=-1,
+                                 start=10, end=20)
+
+        self.assertEqual(a.start, 10)
+        self.assertEqual(a.end, 20)
+        self.assertEqual(a.count, 60)
+        self.assertEqual(a.playing_count, 11)
+        self.assertEqual(a.interval, -1)
+        self.assertEqual(a.index, 10)
+        self.assertTrue(a.at_start)
+        self.assertFalse(a.at_end)
+        self.assertTrue(a.is_reversed)
+        self.assertFalse(a.is_forward)
+
+        # Test irregular args.
+        a = pie.entity.MAnimated(count=60, interval=-1,
+                                 start=20, end=10)
+
+        self.assertEqual(a.start, 20)
+        self.assertEqual(a.end, 10)
+        self.assertEqual(a.count, 60)
+        # Weird result
+        self.assertEqual(a.playing_count, 9)
+        self.assertEqual(a.interval, -1)
+        self.assertEqual(a.index, 20)
+        self.assertTrue(a.at_start)
+        # Another funky result
+        self.assertTrue(a.at_end)
+        self.assertTrue(a.is_reversed)
+        self.assertFalse(a.is_forward)
 
     def test_prop_at_start(self):
         assert False

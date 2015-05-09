@@ -16,10 +16,10 @@ class Demo(Engine):
 
         boxy = Distributed(Fill((20, 20),
                                  fill_color=(255, 0, 0),
-                                 center=(512, 256)),
+                                 center=(700, 312)),
                             Fill((20, 20),
                                  fill_color=(0, 255, 0),
-                                 center=(712, 312)),
+                                 center=(500, 312)),
                             Fill((20, 20),
                                  fill_color=(0, 0, 255),
                                  center=(312, 312)),
@@ -53,6 +53,7 @@ class Demo(Engine):
                             Fill((20, 20),
                                  fill_color=(0, 0, 255),
                                  center=(312, 312)))
+        # boxy.distribute()
         self.boxy = boxy
         self.render_group.add(boxy)
         self.drag_handler.append(boxy)
@@ -62,7 +63,6 @@ class Demo(Engine):
         self.boxy.update()
 
 
-
 if __name__ == "__main__":
     pygame.init()
 
@@ -70,7 +70,7 @@ if __name__ == "__main__":
                                          pygame.RESIZABLE)
 
     bf = lambda: BackgroundImage(
-        pygame.image.load("assets/bg1.png").convert())
+                        pygame.image.load("assets/bg1.png").convert())
 
     game = Demo(screen_factory=sf, background_factory=bf)
 

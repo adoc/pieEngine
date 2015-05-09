@@ -6,6 +6,7 @@ import uuid
 import pygame
 
 from pie.math import vect_diff
+from pie.animation import AnimationLoop, Animation
 
 
 # __all__ = ('Point',
@@ -208,32 +209,95 @@ class EDirtySprite(pygame.sprite.DirtySprite, MIdentity, MSurfaceRect):
                                   **surface_rect_kwa)
 
 
-## Completely experimental and unfinished.... There be dragons below here.
-class CompositeEntity(MIdentity):
-    def __init__(self):
-        pass
+# TODO: Good start but doesn't handle some irregular but useful arg combos.
+class MAnimated:
+    def __init__(self, count=0, interval=1.0, start=0,
+                 end=0, autostart=True,
+                 animation_factory=lambda: AnimationLoop()):
+        """Mixin for animated Entity classes. The ``frame_index``
+        property can be used
 
-    # rect??
-    # dirty rect?
+        :param int count:
+        :param float interval:
+        :param int start:
+        :param int end:
+        :param bool autostart:
+        :param func animation_factory:
+        :return:
+        """
 
+        self.__start = self.__index = start
+        self.__interval = interval
+        self.__count = count
+        self.__end = end > 0 and end or (count - 1)
+        self.__animation_obj = animation_factory()
 
-    def present_comp(self):
-        pass
+        if autostart:
+            self.__animation_obj.start()
 
+    #Value props
+    @property
+    def start(self):
+        return self.__start
 
+    @property
+    def end(self):
+        return self.__end
 
+    @property
+    def count(self):
+        return self.__count
 
-# TODO: Not finished. Flesh this out and possibly make it an entity.
-class AnimatedSpriteCluster:
-    def __init__(self, animated_sprites, pos, size, distribution_function=None, animation_function=None):
-        self.__animated_sprites = animated_sprites
-        self.rect = pygame.Rect(pos[0], pos[1], size[0], size[1])
+    @property
+    def playing_count(self):
+        return abs(
+                (self.end - self.start + 1) / self.interval)
 
-        self.__distribution_function = distribution_function
-        self.__animation_function = animation_function
+    @property
+    def interval(self):
+        return self.__interval
 
+    @property
+    def index(self):
+        return self.__index
+
+    #Transport props
+    @property
+    def at_start(self):
+        return self.index <= self.start
+
+    @property
+    def at_end(self):
+        return self.index >= self.end
+
+    @property
+    def is_reversed(self):
+        return self.interval < 0
+
+    @property
+    def is_forward(self):
+        return self.interval > 0
+
+    # Transport methods
+    def advance(self):
+        self.__index += self.interval
+        self.__index %= self.count
+
+    def flip(self):
+        self.__interval = -self.interval
+
+    def reverse(self):
+        self.__interval = -abs(self.interval)
+
+    def forward(self):
+        self.__interval = abs(self.interval)
+
+    def rewind(self):
+        self.__index = self.__start
+
+    def fast_forward(self):
+        self.__index = self.__end
+
+    # Loop Method
     def update(self):
-        map(lambda s: s.update(), self.__animated_sprites)
-
-    def draw(self, surface):
-        map(lambda s: s.draw(surface), self.__animated_sprites)
+        self.__animation_obj.update(self)

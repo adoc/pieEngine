@@ -188,14 +188,20 @@ class Engine(MIdentity, MRunnable):
 
         new_size = event.dict['size']
         surface_size = self.__screen.get_size()
+        old_center = self.__screen.get_rect().center
         if new_size != surface_size:
             self.__screen = pygame.display.set_mode(new_size,
                                                     self.__screen.get_flags(),
                                                     self.__screen.get_bitsize())
             # TODO: This centers everything. We can easily add options.
             self.init(offset=vect_diff(self.__screen.get_rect().center,
-                                       self.__background.rect.center))
+                                       old_center))
         self.__screen_width, self.__screen_height = self.__screen.get_size()
+
+    @property
+    def screen(self):
+        # Debug only
+        return self.__screen
 
     @property
     def render_group(self):

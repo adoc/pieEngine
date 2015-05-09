@@ -3,25 +3,28 @@
 from pie.base import MRunnable
 
 
-class AnimationLoop(MRunnable):
-    def __init__(self, animated_entity, bounce=True, once=False, auto_start=False):
+class Animation(MRunnable):
+    pass
+
+
+class AnimationLoop(Animation):
+    def __init__(self, bounce=True, once=False, auto_start=False):
         MRunnable.__init__(self, auto_start=auto_start)
-        self.__ae = animated_entity
         self.__bounce = bounce
         self.__once = once
 
-    def update(self):
+    def update(self, entity):
         if self.running:
             try:
                 return
             finally:
-                self.__ae.advance()
+                entity.advance()
 
-                if self.__once and self.__ae.at_start:
+                if self.__once and entity.at_start:
                     self.__start = False
 
                 if self.__bounce:
-                    if self.__ae.at_end:
-                        self.__ae.negate_interval()
-                    if self.__ae.at_start and self.__ae.is_reversed:
-                        self.__ae.negate_interval()
+                    if entity.at_end:
+                        entity.reverse()
+                    if entity.at_start and entity.is_reversed:
+                        entity.forward()
