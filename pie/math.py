@@ -27,10 +27,18 @@ def vect_diff(coord1, coord2):
     # dif_vec = Vector2(ceil(*coord1)) - Vector2(ceil(*coord2))
     # dif_vec = Vector2(roun(*coord1)) - Vector2(roun(*coord2))
     dif_vec = Vector2(coord1) - Vector2(coord2)
-    #return Vector2(math.ceil(dif_vec.x), math.ceil(dif_vec.y))
-    return dif_vec
+    return Vector2(math.ceil(dif_vec.x), math.ceil(dif_vec.y))
+    #return dif_vec
 
 
+def sinus(period, amplitude, offset, phase=0):
+    # In radians
+    # period from 0.0 to 1.0
+    # amplitude in pixels.
+    # offset in pixels.
+    if not period:
+        return offset
+    return amplitude * math.sin(period + phase) + offset
 
 def vect_sum(coord1, coord2):
     return Vector2(coord1) + Vector2(coord2)

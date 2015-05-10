@@ -214,7 +214,7 @@ class EDirtySprite(pygame.sprite.DirtySprite, MIdentity, MSurfaceRect):
 class MAnimated:
     def __init__(self, count=0, interval=1.0, start=0,
                  end=0, autostart=True,
-                 animation_factory=lambda: AnimationLoop(bounce=True)):
+                 animation_factory=lambda: AnimationLoop()):
         """Mixin for animated Entity classes. The ``frame_index``
         property can be used
 

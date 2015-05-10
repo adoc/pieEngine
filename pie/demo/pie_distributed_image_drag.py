@@ -8,7 +8,7 @@ import pygame
 from pie.entity.background import BackgroundImage
 from pie.entity.primitive import Fill
 from pie.entity.image import Image
-from pie.entity.composite import DistributedOnce
+from pie.entity.composite import DistributedOnce, DistributedAnimated
 from pie.engine import Engine
 
 
@@ -18,20 +18,19 @@ class Demo(Engine):
 
         image_surf = pygame.image.load("assets/bomber10000.png").convert_alpha()
         image_surf = pygame.transform.scale(image_surf, (64,64))
-        images = [Image(image_surf, center=(512,256)) for _ in range(10)]
 
-        boxy = DistributedOnce(*images)
 
-        self.boxy = boxy
 
-        self.render_group.add(boxy) # Adding a group here, but pygame breaks this down in to individual sprites, therefore breaking any sub_group functionality.
+        boxy = DistributedOnce(*[Image(image_surf, center=(512,256))
+                                 for _ in range(10)])
+
+        self.add_render_plain(boxy) # Adding a group here, but pygame breaks this down in to individual sprites, therefore breaking any sub_group functionality.
         self.drag_handler.append(boxy)
 
-    def update(self):
-        Engine.update(self)
-        self.boxy.update()
-
-
+        boxy = DistributedAnimated(*[Image(image_surf, center=(512,256))
+                                 for _ in range(1)])
+        self.add_render_plain(boxy) # Adding a group here, but pygame breaks this down in to individual sprites, therefore breaking any sub_group functionality.
+        self.drag_handler.append(boxy)
 
 
 
@@ -47,9 +46,9 @@ if __name__ == "__main__":
 
 
     game = Demo(screen_factory=sf, background_factory=bf)
-    t = Timer(10, game.stop)
-    t.start()
+    #t = Timer(10, game.stop)
+    #t.start()
 
     game.start()
 
-    t.join()
+    #t.join()

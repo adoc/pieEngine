@@ -41,17 +41,18 @@ class FpsClock:
     def get_fps(self):
         return self.__clock.get_fps()
 
+
 # TODO: Refactoring [#3]
 class Renderer:
     """
     """
-    def __init__(self, screen, background, group, non_static_background=False):
+    def __init__(self, screen, background, group,
+                 non_static_background=False):
         self.__screen = screen
 
         self.__background = background # How do we handle backgrounds?? [#3]
         self.__group = group # Does this stay a group of sprites only? [#3]
         # Do we add the "list of groups" abstract here? [#3]
-
 
         if non_static_background:
             self.render = self.__render_non_static
@@ -120,6 +121,7 @@ class Engine(MRunnable, MIdentity):
 
         self.__render_group = fallback_factory(render_group_factory,
                                                pygame.sprite.OrderedUpdates)
+        self.__update_group = []
 
         self.__renderer = Renderer(self.__screen, self.__background,
                                    self.__render_group,
@@ -169,10 +171,6 @@ class Engine(MRunnable, MIdentity):
         self.__screen_width, self.__screen_height = self.__screen.get_size()
 
     @property
-    def render_group(self):
-        return self.__render_group
-
-    @property
     def assets(self):
         return self.__assets
 
@@ -197,14 +195,20 @@ class Engine(MRunnable, MIdentity):
         """
         self.__renderer.init(offset=offset)
 
+    def add_render_plain(self, *entities):
+        # This by way of pygame will break out the contained sprites.
+        self.__render_group.add(*entities)
+        for entity in entities:
+            self.__update_group.append(entity) # This is to track the actual
+
     def update(self):
         """
         """
         self.events.update()
         self.drag_handler.update()
 
-        for sprite in self.__render_group:
-            sprite.update()
+        for entity in self.__update_group:
+            entity.update()
 
     def throttle(self):
         """
