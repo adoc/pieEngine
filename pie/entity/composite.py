@@ -3,7 +3,9 @@ import math
 import pygame
 import pygame.math
 
-from pie.entity import MIdentity, MRect, MAnimated
+import pie._pygame.sprite
+from pie.entity import MIdentity, MRect
+from pie.entity.animated import SequenceAnimation
 from pie.math import vect_diff, sinus
 
 
@@ -114,9 +116,9 @@ def radial_sinusoidal(group, min_radius, max_radius, interval=0):
 
     for n, sprite in enumerate(group):
         farthest_vector = vect_diff(center_vect,
-                                       rotation_vect.rotate(deg * n + interval))
+                                       rotation_vect.rotate((deg * n + interval) % 360))
         new_rotation_vector = center_vect.lerp(farthest_vector,
-                                               abs(sinus((n*deg+interval+100)*math.pi/180, .1, .9)))
+                                               abs(sinus((deg+interval*n)*math.pi/180, .1, .9)))
         sprite.rect.center = new_rotation_vector
 
 # class RadialDistribution:
@@ -146,7 +148,7 @@ class MRelativeGroup:
         self.__old_rect = self.rect.copy()
 
 
-class DistributedOnce(pygame.sprite.OrderedUpdates, MIdentity, MRect,
+class DistributedOnce(pie._pygame.sprite.OrderedUpdates, MIdentity, MRect,
                       MRelativeGroup):
     def __init__(self, *entities,
                  distribute_factory=lambda g, i: radial_sinusoidal(g, 70, 100, interval=i),
@@ -184,16 +186,17 @@ class DistributedOnce(pygame.sprite.OrderedUpdates, MIdentity, MRect,
         MRelativeGroup.update(self)
 
 
-class DistributedAnimated(DistributedOnce, MAnimated):
+class DistributedAnimated(DistributedOnce):
     def __init__(self, *entities,
-                 distribute_factory=lambda g, i: radial_sinusoidal(g, 30, 100, interval=i),
+                 distribute_factory=lambda g, i: radial_sinusoidal(g, 30, 50, interval=i),
                  collide_func=pygame.sprite.collide_rect):
         DistributedOnce.__init__(self, *entities,
                  distribute_factory=distribute_factory,
                  collide_func=collide_func)
-        MAnimated.__init__(self, 360, interval=2)
+
+        self.__seq = SequenceAnimation(count=360, interval=2)
 
     def update(self):
         DistributedOnce.update(self)
-        MAnimated.update(self)
-        self.distribute(idx=self.index)
+        self.__seq.update()
+        self.distribute(idx=self.__seq.index)

@@ -1,27 +1,31 @@
 import pygame
 
-from pie.entity import ESprite, MIdentity, MRect
+from pie.entity import MIdentity, MRect, MSurface, MSurfaceRect, MSprite
 
 
-class Point(ESprite):
-    def __init__(self, pos, radius=0):
+class Point(MIdentity, MRect, MSprite):
+    def __init__(self, pos, radius=0, **kwa):
         MIdentity.__init__(self)
         MRect.__init__(self, pos, (0, 0))
-        self.__radius = 0
+        if radius > 5 and not 'collide_func' in kwa:
+            kwa['collide_func'] = pygame.sprite.collide_circle
+        MSprite.__init__(self, **kwa)
+        self.__radius = radius
 
     @property
     def radius(self):
         return self.__radius
 
 
-class Fill(ESprite):
+class Fill(MIdentity, MSurfaceRect, MSprite):
     """A static solid color surface.
     """
     def __init__(self, *surface_args, surface_factory=None,
                  fill_color=pygame.Color(0, 0, 0), sprite_groups=[], **rect_kwa):
-        ESprite.__init__(self, *surface_args,
-                                     surface_factory=surface_factory,
-                                     sprite_groups=sprite_groups, **rect_kwa)
+        MIdentity.__init__(self)
+        MSurfaceRect.__init__(self, *surface_args, surface_factory=surface_factory)
+        MSprite.__init__(self, sprite_groups=sprite_groups)
+
         self.__fill_color = fill_color
         self.fill()
 

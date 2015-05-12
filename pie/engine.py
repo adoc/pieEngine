@@ -4,6 +4,7 @@ Game Engine.
 
 import pygame.sprite
 
+import pie._pygame.sprite
 from pie.base import MRunnable
 from pie.entity import MIdentity
 from pie.entity.background import BackgroundFill
@@ -90,7 +91,7 @@ class Engine(MRunnable, MIdentity):
     from this.
     """
 
-    def __init__(self, screen_factory=None, clock_factory=None,
+    def __init__(self, screen, clock_factory=None,
                  clock_accurate=False, target_fps=60,
                  debug=False, background_factory=None,
                  render_group_factory=None,
@@ -109,8 +110,9 @@ class Engine(MRunnable, MIdentity):
         self.__debug = debug
         self.__target_fps = target_fps
 
-        self.__screen = fallback_factory(screen_factory,
-                                         self.__default_screen_factory)
+        self.__screen = (isinstance(screen, pygame.Surface) and screen or
+                                    fallback_factory(screen,
+                                         self.__default_screen_factory))
 
         self.__clock = fallback_factory(clock_factory,
                                         lambda: FpsClock(target_fps,
@@ -120,7 +122,7 @@ class Engine(MRunnable, MIdentity):
                                         self.__default_bg_surface_factory)
 
         self.__render_group = fallback_factory(render_group_factory,
-                                               pygame.sprite.OrderedUpdates)
+                                               pie._pygame.sprite.OrderedUpdates)
         self.__update_group = []
 
         self.__renderer = Renderer(self.__screen, self.__background,
@@ -149,7 +151,7 @@ class Engine(MRunnable, MIdentity):
                                         info.current_h // 2))
 
     def __default_bg_surface_factory(self):
-        return BackgroundFill(screen_factory=self.__screen.copy)
+        return BackgroundFill(self.__screen.copy())
 
     def __ev_resize(self, event):
         """Resize the display screen and...
@@ -199,7 +201,7 @@ class Engine(MRunnable, MIdentity):
         # This by way of pygame will break out the contained sprites.
         self.__render_group.add(*entities)
         for entity in entities:
-            self.__update_group.append(entity) # This is to track the actual
+            self.__update_group.append(entity) # This is to track the actual groups being added.
 
     def update(self):
         """
@@ -234,8 +236,8 @@ class Engine(MRunnable, MIdentity):
 
         while not self.stopped:
             self.update()
-            self.throttle()
             self.clear()
+            self.throttle()
             self.render()
 
         return self.__end_state

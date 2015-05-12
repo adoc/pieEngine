@@ -1,20 +1,20 @@
-# TODO: Module needs to refactor away from "reset" methods. .reset may not be needed.
-# Bit of overkill but heart is in the right place!
+# Might be a bit of overkill but heart is in the right place and
+# implementations have seemed clean.
+#
+# Maybe a little better now!
 
 import uuid
 
 import pygame
+import pygame.math
 
 from pie.math import vect_diff
-from pie.animation import AnimationLoop, Animation
 
 
-# __all__ = ('Point',
-#            'Fill',
-#            'BackgroundFill',
-#            'Image',
-#            'BackgroundImage',
-#            'Animated')
+__all__ = ('MIdentity',
+           'MRect',
+           'MSurface',
+           'MSprite')
 
 
 __entity_ord = 0
@@ -43,7 +43,7 @@ class MIdentity:
     """
     """
 
-    def __init__(self, ord_factory=next_entity_ord, id_factory=uuid.uuid4):
+    def __init__(self, **kwa):
         """Base parent class for all Entities. Provides an ordinal
         ``ord`` and unique identifier ``id``. Default uses module-level
         counter for the ordinal and UUID4 for the id. Either can be
@@ -57,8 +57,8 @@ class MIdentity:
 
 
         """
-        self.__ord = ord_factory()
-        self.__id = id_factory()
+        self.__ord = kwa.pop('ord_factory', next_entity_ord)
+        self.__id = kwa.pop('id_factory', uuid.uuid4)
 
     @property
     def ord(self):
@@ -73,37 +73,31 @@ class MIdentity:
         """
         return self.__id
 
-    def update(self):
-        raise NotImplementedError("Entity ``update`` method is not "
-                                  "implemented.")
-
-    def present(self):
-        raise NotImplementedError("Entity ``present`` method is not "
-                                  "implemented.")
-
 
 class MRect:
-    """Container Entity for a ``pygame.Rect`` object. Provides
-    ``rect`` property to get the ``Rect`` object. Also provides a
-    ``reset`` method to replace the current ``Rect``.
+    """Entity mixin for a ``pygame.Rect`` object.
+
+    Provides a ``rect`` property. Also provides in place rect transforms.
     """
 
-    def __init__(self, *rect_args, rect_factory=None):
-        """Reset the ``Rect`` object.
+    def __init__(self, *args, **kwa):
+        """Reset the ``Rect`` object for this Entity.
 
         :param *rect_args: passed directly to a ``pygame.Rect``
             constructor
         :param rect_factory: Rect factory function. This takes
             precedence over ``*rect_args``
         """
+        self.__rect = pygame.Rect(*args)
 
-        self.__rect = (callable(rect_factory) and rect_factory() or
-                       pygame.Rect(*rect_args))
-        self.__rect.normalize()
+        if kwa.pop('normalize', False):
+            self.__rect.normalize()
+
+        self.parallax_offset = 1.0
 
     @property
     def rect(self):
-        """Returns the ``Rect`` object.
+        """Property returning this Entity's rect.
         """
         return self.__rect
 
@@ -129,176 +123,161 @@ class MRect:
         self.__rect = self.__rect.fit(rect)
 
 
+# TODO: Look for relations and differences between .viewport and .rect as implementations are fleshed out.
 class MSurface:
     """
     """
 
-    def __init__(self, *surface_args, surface_factory=None):
+    def __init__(self, *surface_args, **kwa):
+
+        """Entity mixin for a ``pygame.Surface`` object.
+
+        Provides a ``surface`` property. Most importantly, provides a
+        ``viewport`` property that represents an area of the surface that is
+        blitted.
+
+        Also provides in place surface transforms.
+
+        If only one argument is passed and it is a ``pygame.Surface`` then we set this surface to that object. Otherwise, we check for a ``surface_factory`` and finally attempt to create a ``pygame.Surface`` using the ``*surface_args``.
+
+        :param surface_args[0]:
+        :param surface_args[]:
+        :param viewport=None:
+        :param convert=True:
+        :param blit_flags=0:
+        :param surface_factory=None:
         """
 
-        :param surface_factory:
-        :return:
-        """
-        self.__surface = (callable(surface_factory) and surface_factory() or
-                          pygame.Surface(*surface_args))
+        viewport = kwa.pop('viewport', None)
+        convert = kwa.pop('convert', False)
+        alpha = kwa.pop('alpha', False)
+        blit_flags = kwa.pop('blit_flags', 0)
+        if surface_args and isinstance(surface_args[0], pygame.Surface):
+            self.__surface = surface_args[0]
+        else:
+            self.__surface = pygame.Surface(*surface_args)
+
+        self.__viewport = viewport or self.__surface.get_rect()
+        self.__old_viewport = self.__viewport.copy()
+        self.__blit_flags = blit_flags
+
+        if convert:
+            if alpha:
+                self.convert_alpha_ip()
+            else:
+                self.convert_ip()
 
     @property
     def surface(self):
+        """Property returning this surface.
+        """
+
         return self.__surface
 
     @property
     def image(self):
-        """Synonym to enable mixing with ``pygame.sprite.Sprite``
+        """Property synonym of this surface to enable mixing with
+        deeper ``pygame.sprite`` APIs.
         """
-        return self.surface
 
-    def convert_ip(self, *conver_args, **conver_kwa):
-        self.__surface = self.__surface.convert(*conver_args, **conver_kwa)
-
-    def convert_alpha_ip(self, *convert_args, **convert_kwa):
-        self.__surface = self.__surface.convert_alpha(*convert_args,
-                                                      **convert_kwa)
-
-    def transform_ip(self, xform_func, *xform_args, **xform_kwa):
-        self.__surface = xform_func(self.__surface, *xform_args, **xform_kwa)
-
-
-class MSurfaceRect(MSurface, MRect):
-    def __init__(self, *surface_args, surface_factory=None, **rect_kwa):
-        MSurface.__init__(self, *surface_args,
-                               surface_factory=surface_factory)
-        self.rect_set_surface(**rect_kwa)
-
-    def rect_set_surface(self, **rect_kwa):
-        MRect.__init__(self, self.surface.get_rect(**rect_kwa))
-
-    def transform_ip(self, xform_func, *xform_args, **xform_kwa):
-        old_rect = self.surface.get_rect().center
-        MSurface.transform_ip(self, xform_func, *xform_args, **xform_kwa)
-        self.rect_set_surface(center=old_rect.center)
-
-
-# TODO: Do we want to implement Sprite, MIdentity and MSurfaceRect at this point?
-class ESprite(pygame.sprite.Sprite, MIdentity, MSurfaceRect):
-    def __init__(self, *surface_args, surface_factory=None,
-                 sprite_groups=(), collide_func=pygame.sprite.collide_rect,
-                 **surface_rect_kwa):
-        pygame.sprite.Sprite.__init__(self, *sprite_groups)
-        MIdentity.__init__(self)
-        MSurfaceRect.__init__(self, *surface_args,
-                                  surface_factory=surface_factory,
-                                  **surface_rect_kwa)
-        self.__collide_func = collide_func
+        return self.surface # Using non-private is intentional here.
 
     @property
-    def collide_func(self):
-        return self.__collide_func
+    def viewport(self):
+        return self.__viewport
 
-    def group_clear(self, surface, rect):
-        # TODO: Keep an eye on this function. may not work in all cases...
-        surface.blit(self.image, rect, area=rect.move(
-            *vect_diff(surface.get_rect().topleft, self.rect.topleft)))
+    @property
+    def viewport_changed(self):
+        return self.__old_viewport != self.__viewport
 
+    @property
+    def blit_flags(self):
+        return self.__blit_flags
 
-class EDirtySprite(pygame.sprite.DirtySprite, MIdentity, MSurfaceRect):
-    def __init__(self, *surface_args, surface_factory=None,
-                 sprite_groups=(), **surface_rect_kwa):
-        pygame.sprite.DirtySprite.__init__(self, *sprite_groups)
-        MIdentity.__init__(self)
-        MSurfaceRect.__init__(self, *surface_args,
-                                  surface_factory=surface_factory,
-                                  **surface_rect_kwa)
+    def blit_view(self, dest_surface, dest):
+        dest_surface.blit(self.image, dest, self.viewport,
+                          special_flags=self.blit_flags)
 
+    def convert_ip(self, *convert_args, **convert_kwa):
+        """Convert this surface using ``pygame.Surface.convert`` API.
+        http://www.pygame.org/docs/ref/surface.html#pygame.Surface.convert
 
-# TODO: Good start but doesn't handle some irregular but useful arg combos.
-class MAnimated:
-    def __init__(self, count=0, interval=1.0, start=0,
-                 end=0, autostart=True,
-                 animation_factory=lambda: AnimationLoop()):
-        """Mixin for animated Entity classes. The ``frame_index``
-        property can be used
-
-        :param int count:
-        :param float interval:
-        :param int start:
-        :param int end:
-        :param bool autostart:
-        :param func animation_factory:
+        :param convert_args:
+        :param convert_kwa:
         :return:
         """
 
-        self.__start = self.__index = start
-        self.__interval = interval
-        self.__count = count
-        self.__end = end > 0 and end or (count - 1)
-        self.__animation_obj = animation_factory()
+        self.__surface = self.surface.convert(*convert_args, **convert_kwa)
 
-        if autostart:
-            self.__animation_obj.start()
+    def convert_alpha_ip(self, *convert_args, **convert_kwa):
+        """Convert this surface using ``pygame.Surface.convert_alpha``
+        API.
+        http://www.pygame.org/docs/ref/surface.html#pygame.Surface.convert_alpha
 
-    #Value props
-    @property
-    def start(self):
-        return self.__start
+        :param convert_args:
+        :param convert_kwa:
+        :return:
+        """
 
-    @property
-    def end(self):
-        return self.__end
+        self.__surface = self.surface.convert_alpha(*convert_args,
+                                                    **convert_kwa)
 
-    @property
-    def count(self):
-        return self.__count
+    def transform_ip(self, xform_func, *xform_args, **xform_kwa):
+        """Use the ``pygame.transform`` API on this surface.
+        http://www.pygame.org/docs/ref/transform.html
 
-    @property
-    def playing_count(self):
-        return abs(
-                (self.end - self.start + 1) / self.interval)
+        :param xform_func:
+        :param xform_args:
+        :param xform_kwa:
+        :return:
+        """
+        old_view_center = self.__viewport.center
+        self.__surface = xform_func(self.surface, *xform_args, **xform_kwa)
+        self.__viewport = self.surface.get_rect(center=old_view_center)
 
-    @property
-    def interval(self):
-        return self.__interval
-
-    @property
-    def index(self):
-        return self.__index
-
-    #Transport props
-    @property
-    def at_start(self):
-        return self.index <= self.start
-
-    @property
-    def at_end(self):
-        return self.index >= self.end
-
-    @property
-    def is_reversed(self):
-        return self.interval < 0
-
-    @property
-    def is_forward(self):
-        return self.interval > 0
-
-    # Transport methods
-    def advance(self):
-        self.__index += self.interval
-        # self.__index %= self.count
-
-    def flip(self):
-        self.__interval = -self.interval
-
-    def reverse(self):
-        self.__interval = -abs(self.interval)
-
-    def forward(self):
-        self.__interval = abs(self.interval)
-
-    def rewind(self):
-        self.__index = self.__start
-
-    def fast_forward(self):
-        self.__index = self.__end
-
-    # Loop Method
     def update(self):
-        self.__animation_obj.update(self)
+        self.__old_viewport = self.__viewport.copy()
+
+
+class MSurfaceRect(MSurface, MRect):
+    def __init__(self, *surface_args, rect_kwa={}, **kwa):
+        MSurface.__init__(self, *surface_args, **kwa)
+        MRect.__init__(self, self.surface.get_rect(**rect_kwa), **kwa)
+
+
+class MSprite(pygame.sprite.Sprite):
+    """MSprite mixin class provides abstract ``collide_func`` prop and
+    ``group_clear`` method.
+    """
+
+    def __init__(self, **kwa):
+        """Initialize MSprite.
+
+        :param collide_func: The collision determination function.
+        :return:
+        """
+        pygame.sprite.Sprite.__init__(self, *kwa.pop('sprite_groups', ()))
+        self.__collide_func = kwa.pop('collide_func',
+                                      pygame.sprite.collide_rect)
+
+    @property
+    def collide_func(self):
+        """Returns the collide function.
+
+        :return: The function to determine collisions with this Sprite.
+        """
+
+        return self.__collide_func
+
+    def group_clear(self, surface, rect):
+        """Used ass callback for ``pygame.sprite.Group().clear`` in the
+        Engine Renderer.
+
+        :param surface: The surface to be partially cleared.
+        :param rect: The rect area to be cleared.
+        """
+
+        # TODO: Keep an eye on this function. may not work in all cases...
+        # TODO: Check if in any way related to viewport or if viewport can be used.
+        surface.blit(self.image, rect, area=rect.move(
+            *vect_diff(surface.get_rect().topleft, self.rect.topleft)))

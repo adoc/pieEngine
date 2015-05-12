@@ -1,5 +1,6 @@
 import unittest
 import uuid
+from entity.animated import MAnimated
 from random import SystemRandom
 
 from pie.entity.primitive import Fill
@@ -337,7 +338,7 @@ class TestFill(TestRectBase):
 class TestMAnimated(unittest.TestCase):
     def test_init_and_props(self):
         # Test "regular args.
-        a = pie.entity.MAnimated()
+        a = MAnimated()
 
         self.assertEqual(a.start, 0)
         self.assertEqual(a.end, -1)
@@ -350,7 +351,7 @@ class TestMAnimated(unittest.TestCase):
         self.assertFalse(a.is_reversed)
         self.assertTrue(a.is_forward)
 
-        a = pie.entity.MAnimated(count=60)
+        a = MAnimated(count=60)
 
         self.assertEqual(a.start, 0)
         self.assertEqual(a.end, 59)
@@ -363,7 +364,7 @@ class TestMAnimated(unittest.TestCase):
         self.assertFalse(a.is_reversed)
         self.assertTrue(a.is_forward)
 
-        a = pie.entity.MAnimated(count=60, interval=-1)
+        a = MAnimated(count=60, interval=-1)
 
         self.assertEqual(a.start, 0)
         self.assertEqual(a.end, 59)
@@ -376,7 +377,7 @@ class TestMAnimated(unittest.TestCase):
         self.assertTrue(a.is_reversed)
         self.assertFalse(a.is_forward)
 
-        a = pie.entity.MAnimated(count=60, interval=-1,
+        a = MAnimated(count=60, interval=-1,
                                  start=10)
 
         self.assertEqual(a.start, 10)
@@ -390,7 +391,7 @@ class TestMAnimated(unittest.TestCase):
         self.assertTrue(a.is_reversed)
         self.assertFalse(a.is_forward)
 
-        a = pie.entity.MAnimated(count=60, interval=-1,
+        a = MAnimated(count=60, interval=-1,
                                  start=10, end=20)
 
         self.assertEqual(a.start, 10)
@@ -405,7 +406,7 @@ class TestMAnimated(unittest.TestCase):
         self.assertFalse(a.is_forward)
 
         # Test irregular args.
-        a = pie.entity.MAnimated(count=60, interval=-1,
+        a = MAnimated(count=60, interval=-1,
                                  start=20, end=10)
 
         self.assertEqual(a.start, 20)

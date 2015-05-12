@@ -19,16 +19,14 @@ class Demo(Engine):
         image_surf = pygame.image.load("assets/bomber10000.png").convert_alpha()
         image_surf = pygame.transform.scale(image_surf, (64,64))
 
-
-
-        boxy = DistributedOnce(*[Image(image_surf, center=(512,256))
+        boxy = DistributedOnce(*[Image(image_surf, rect_kwa={'center':(512,256)})
                                  for _ in range(10)])
 
         self.add_render_plain(boxy) # Adding a group here, but pygame breaks this down in to individual sprites, therefore breaking any sub_group functionality.
         self.drag_handler.append(boxy)
 
-        boxy = DistributedAnimated(*[Image(image_surf, center=(512,256))
-                                 for _ in range(1)])
+        boxy = DistributedAnimated(*[Image(image_surf, rect_kwa={'center':(512,256)})
+                                     for _ in range(10)])
         self.add_render_plain(boxy) # Adding a group here, but pygame breaks this down in to individual sprites, therefore breaking any sub_group functionality.
         self.drag_handler.append(boxy)
 
