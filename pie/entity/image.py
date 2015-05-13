@@ -11,6 +11,4 @@ class Image(MIdentity, MSurfaceRect, MSprite):
         MSprite.__init__(self, **kwa)
 
 
-
-
 Surface = Image

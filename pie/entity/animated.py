@@ -4,11 +4,12 @@
 import pygame
 
 from pie.asset import get_largest_frame
-from pie.entity import MIdentity, MRect, MSurface, MSprite
+from pie.entity import MIdentity, MRect, MSurfaceRect, MSprite
 from pie.animation import AnimationLoop
 
 
 # TODO: Good start but doesn't handle some irregular but useful arg combos.
+# Where does this go????
 class SequenceAnimation:
     def __init__(self, **kwa):
         """Mixin for animated Entity classes. The ``frame_index``
@@ -80,7 +81,7 @@ class SequenceAnimation:
     # Transport methods
     def advance(self):
         self.__index += self.interval
-        # self.__index %= self.count
+        self.__index %= self.count
 
     def flip(self):
         self.__interval = -self.interval
@@ -102,22 +103,20 @@ class SequenceAnimation:
         self.__animation_obj.update(self)
 
 
-class SurfaceSequence(MIdentity, MRect, MSurface, MSprite):
+class SurfaceSequence(MIdentity, MSurfaceRect, MSprite):
     def __init__(self, frames, sprite_groups=[], autostart=True, collide_func=None,
                  **surface_rect_kwa):
         pygame.sprite.Sprite.__init__(self, *sprite_groups)
         MIdentity.__init__(self)
-        # TODO: get_largest_frame may not be needed if we enforce animations to have a constant frame size.
-        MRect.__init__(self,
-                         get_largest_frame(frames).get_rect(**surface_rect_kwa))
+        MSurfaceRect.__init__(self,get_largest_frame(frames), **surface_rect_kwa)
         MSprite.__init__(self, collide_func=collide_func)
 
         self.__seq = SequenceAnimation(count=len(frames), autostart=autostart)
         self.__frames = tuple(frames) # Not mutable for now.
 
     @property
-    def surface(self):
-        return self.__frames[self.__seq.index]
+    def image(self):
+        return self.__frames[int(self.__seq.index)]
 
     def update(self):
         self.__seq.update()

@@ -248,6 +248,16 @@ class MSurfaceRect(MSurface, MRect):
         MSurface.__init__(self, *surface_args, **kwa)
         MRect.__init__(self, self.surface.get_rect(**rect_kwa), **kwa)
 
+    @property
+    def flip_rect(self):
+        """Flipped rectangle coordinates for use in pymunk.
+
+        :return:
+        """
+        nr = self.rect.copy()
+        nr.top = self.surface.get_height() - nr.top
+        return nr
+
 
 class MSprite(pygame.sprite.Sprite):
     """MSprite mixin class provides abstract ``collide_func`` prop and

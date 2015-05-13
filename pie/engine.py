@@ -192,6 +192,10 @@ class Engine(MRunnable, MIdentity):
     def screen_height(self):
         return self.__screen_height
 
+    @property
+    def target_fps(self):
+        return self.__target_fps
+
     def init(self, offset=None):
         """
         """
