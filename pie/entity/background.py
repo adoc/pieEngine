@@ -1,13 +1,12 @@
 """
 """
-
-import pygame.math
+import functools
 
 import pie._pygame.sprite
 
-from pie.entity import MRect
 from pie.entity.primitive import Fill
 from pie.entity.image import Image
+from pie.math import project_3d
 
 
 class BackgroundFill(Fill):
@@ -26,10 +25,15 @@ class ParallaxBackground(pie._pygame.sprite.OrderedUpdates):
 
     def update(self):
         if self.viewport_changed:
+            viewport_size = self.viewport.size
+            project = functools.partial(project_3d,
+                                           surface_size=viewport_size,
+                                          recording_surface=viewport_size +
+                                                             (1,))
             for entity in self.sprites():
-                entity.viewport.topleft = (
-                    pygame.math.Vector2(self.viewport.topleft) *
-                    entity.parallax_offset)
+                entity.viewport.topleft = project(self.viewport.topleft +
+                                                  (entity.parallax_distance,))
+
             self.__old_viewport = self.__viewport.copy()
 
     @property

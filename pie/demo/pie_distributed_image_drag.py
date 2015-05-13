@@ -35,15 +35,13 @@ class Demo(Engine):
 if __name__ == "__main__":
     pygame.init()
 
-    sf = lambda: pygame.display.set_mode((1024, 512),
-                                         pygame.RESIZABLE)
 
     bf = lambda: BackgroundImage(
                         pygame.image.load("assets/bg2.png").convert())
 
 
-
-    game = Demo(screen_factory=sf, background_factory=bf)
+    game = Demo(pygame.display.set_mode((1024, 512),
+                                         pygame.RESIZABLE), background_factory=bf)
     #t = Timer(10, game.stop)
     #t.start()
 

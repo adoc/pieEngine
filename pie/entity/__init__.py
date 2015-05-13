@@ -93,13 +93,17 @@ class MRect:
         if kwa.pop('normalize', False):
             self.__rect.normalize()
 
-        self.parallax_offset = 1.0
+        self.__parallax_distance = kwa.pop('parallax_distance', 1.0)
 
     @property
     def rect(self):
         """Property returning this Entity's rect.
         """
         return self.__rect
+
+    @property
+    def parallax_distance(self):
+        return self.__parallax_distance
 
     def move_ip(self, x, y):
         self.__rect = self.__rect.move(x, y)

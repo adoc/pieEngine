@@ -9,7 +9,6 @@ if __name__ == "__main__":
     pygame.surfarray.use_arraytype('numpy')
 
     def dodge(front, back):
-        # The formula comes from http://www.adobe.com/devnet/pdf/pdfs/blend_modes.pdf
         result=back*256.0/(256.0-front)
         result[result>255]=255
         result[front==255]=255
