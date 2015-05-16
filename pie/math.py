@@ -1,12 +1,29 @@
 """
 """
 import math
+from fractions import Fraction
+
+import pygame
 
 from pygame.math import Vector2
 
 
-__all__ = ("sub_size",)
+# __all__ = ("sub_size",)
 
+
+def vect_to_rad(vect):
+    # return math.atan(vect[1] / vect[0])
+    return math.atan2(vect[1], vect[0])
+
+# wrong.
+def rad_to_vect(rad):
+    return Vector2(math.cos(rad), math.sin(rad))
+
+def flip_y_normals(vect, height):
+    return Vector2(vect[0], height - vect[1])
+
+def flip_rect_y_normals(rect):
+    return pygame.Rect((rect.x, rect.size[1] - rect.y), rect.size)
 
 def sub_size(size1, size2):
     return (size1[0] - size2[0], size1[1] - size2[1])

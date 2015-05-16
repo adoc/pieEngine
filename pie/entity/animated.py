@@ -108,7 +108,7 @@ class SurfaceSequence(MIdentity, MSurfaceRect, MSprite):
                  **surface_rect_kwa):
         pygame.sprite.Sprite.__init__(self, *sprite_groups)
         MIdentity.__init__(self)
-        MSurfaceRect.__init__(self,get_largest_frame(frames), **surface_rect_kwa)
+        MSurfaceRect.__init__(self, get_largest_frame(frames), rect_kwa=surface_rect_kwa)
         MSprite.__init__(self, collide_func=collide_func)
 
         self.__seq = SequenceAnimation(count=len(frames), autostart=autostart)
@@ -120,3 +120,27 @@ class SurfaceSequence(MIdentity, MSurfaceRect, MSprite):
 
     def update(self):
         self.__seq.update()
+
+
+class SurfaceSelection(MIdentity, MSurfaceRect, MSprite):
+    def __init__(self, frames, sprite_groups=[], autostart=True, collide_func=None,
+                 **surface_rect_kwa):
+        pygame.sprite.Sprite.__init__(self, *sprite_groups)
+        MIdentity.__init__(self)
+        MSurfaceRect.__init__(self, get_largest_frame(frames), **surface_rect_kwa)
+        MSprite.__init__(self, collide_func=collide_func)
+        self.__frames = tuple(frames) # Not mutable for now.
+        self.__count = len(self.__frames)
+        self.__index = 0
+
+    @property
+    def image(self):
+        try:
+            return self.__frames[self.__index]
+        except IndexError:
+            print("fucked frame: %s" % self.__index )
+
+    def set_frame(self, index):
+        index = int(index)
+        index %= self.__count
+        self.__index = index
