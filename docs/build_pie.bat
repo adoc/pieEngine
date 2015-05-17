@@ -1,0 +1,1 @@
+sphinx-apidoc -d 2 -e -o API ..\pie
