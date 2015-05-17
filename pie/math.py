@@ -1,14 +1,9 @@
 """
 """
 import math
-from fractions import Fraction
 
 import pygame
-
-from pygame.math import Vector2
-
-
-# __all__ = ("sub_size",)
+import pygame.math
 
 
 def vect_to_rad(vect):
@@ -17,10 +12,10 @@ def vect_to_rad(vect):
 
 # wrong.
 def rad_to_vect(rad):
-    return Vector2(math.cos(rad), math.sin(rad))
+    return pygame.math.Vector2(math.cos(rad), math.sin(rad))
 
 def flip_y_normals(vect, height):
-    return Vector2(vect[0], height - vect[1])
+    return pygame.math.Vector2(vect[0], height - vect[1])
 
 def flip_rect_y_normals(rect):
     return pygame.Rect((rect.x, rect.size[1] - rect.y), rect.size)
@@ -41,12 +36,17 @@ def roun(*args):
     return tuple([round(arg) for arg in args])
 
 
-def vect_diff(coord1, coord2):
-    # dif_vec = Vector2(ceil(*coord1)) - Vector2(ceil(*coord2))
-    # dif_vec = Vector2(roun(*coord1)) - Vector2(roun(*coord2))
-    dif_vec = Vector2(coord1) - Vector2(coord2)
-    return Vector2(math.ceil(dif_vec.x), math.ceil(dif_vec.y))
-    #return dif_vec
+# TODO: Deprecated unless the math.ceil was important part of the function.
+def vect_diff(coord1, coord2, vector_factory=pygame.math.Vector2):
+    """
+
+    :param coord1:
+    :param coord2:
+    :param vector_factory:
+    :return:
+    """
+    dif_vec = vector_factory(coord1) - vector_factory(coord2)
+    return vector_factory(math.ceil(dif_vec[0]), math.ceil(dif_vec[1]))
 
 
 def sinus(period, amplitude, offset, phase=0):
@@ -59,8 +59,9 @@ def sinus(period, amplitude, offset, phase=0):
     return amplitude * math.sin(period + phase) + offset
 
 
-def vect_sum(coord1, coord2):
-    return Vector2(coord1) + Vector2(coord2)
+# TODO: Deprecated. Vector objects should sum.
+def vect_sum(coord1, coord2, vector_factory=pygame.math.Vector2):
+    return vector_factory(coord1) + vector_factory(coord2)
 
 
 def project_3d(point, surface_size=(1000, 1000),
@@ -80,9 +81,9 @@ def project_3d(point, surface_size=(1000, 1000),
     :return tuple: (x, y) plotted point.
     """
 
-    #       X Component
+    #:      X Component
     return ((point[0] * surface_size[0]) /
             ((point[2] * recording_surface[0]) * recording_surface[2]),
-    #       Y Component
+    #:      Y Component
             (point[1] * surface_size[1]) /
             ((point[2] * recording_surface[1]) * recording_surface[2]))

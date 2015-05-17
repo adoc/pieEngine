@@ -4,8 +4,10 @@ Game Engine.
 
 import pygame.sprite
 
+
 import pie._pygame.sprite
 from pie.base import MRunnable
+from pie.clock import RateClock
 from pie.entity import MIdentity
 from pie.entity.background import BackgroundFill
 from pie.asset import AssetHandler
@@ -13,34 +15,7 @@ from pie.event import DragHandler, EventHandler
 from pie.math import vect_diff
 from pie.util import fallback_factory
 
-
-__all__ = ("FpsClock", "Renderer", "Engine")
-
-
-class FpsClock:
-    def __init__(self, target_fps, accurate=True):
-        self.__clock = pygame.time.Clock()
-        self.__target_fps = target_fps
-        if accurate:
-            self.tick = self.__tick_busy_loop
-
-    def tick(self):
-        return self.__tick()
-
-    def __tick(self):
-        return self.__clock.tick(self.__target_fps)
-
-    def __tick_busy_loop(self):
-        return self.__clock.tick_busy_loop(self.__target_fps)
-
-    def get_time(self):
-        return self.__clock.get_time()
-
-    def get_rawtime(self):
-        return self.__clock.get_rawtime()
-
-    def get_fps(self):
-        return self.__clock.get_fps()
+__all__ = ("Renderer", "Engine")
 
 
 # TODO: Refactoring [#3]
@@ -112,17 +87,17 @@ class Engine(MRunnable, MIdentity):
 
         self.__screen = (isinstance(screen, pygame.Surface) and screen or
                                     fallback_factory(screen,
-                                         self.__default_screen_factory))
+                                         self.__default_screen_factory)())
 
-        self.__clock = fallback_factory(clock_factory,
-                                        lambda: FpsClock(target_fps,
-                                                    accurate=clock_accurate))
+        self.__clock = (fallback_factory(clock_factory,
+                                         lambda: RateClock(target_fps,
+                                                    accurate=clock_accurate))())
 
-        self.__background = fallback_factory(background_factory,
-                                        self.__default_bg_surface_factory)
+        self.__background = (fallback_factory(background_factory,
+                                        self.__default_bg_surface_factory)())
 
         self.__render_group = fallback_factory(render_group_factory,
-                                               pie._pygame.sprite.OrderedUpdates)
+                                            pie._pygame.sprite.OrderedUpdates)()
         self.__update_group = []
 
         self.__renderer = Renderer(self.__screen, self.__background,
@@ -198,7 +173,7 @@ class Engine(MRunnable, MIdentity):
 
     @property
     def fps(self):
-        return self.__clock.get_fps()+1
+        return self.__clock.framerate + 1
 
     def init(self, offset=None):
         """

@@ -1,3 +1,5 @@
+"""Entities base classes.
+"""
 # Might be a bit of overkill but heart is in the right place and
 # implementations have seemed clean.
 #
@@ -8,12 +10,15 @@ import uuid
 import pygame
 import pygame.math
 
+# TODO: Check this usage and see if we can remove it from pie.math.
 from pie.math import vect_diff
 
 
-__all__ = ('MIdentity',
+__all__ = ('next_entity_ord',
+           'MIdentity',
            'MRect',
            'MSurface',
+           'MSurfaceRect',
            'MSprite')
 
 
@@ -40,55 +45,65 @@ def _reset_entity_ord(confirm=False):
 
 
 class MIdentity:
-    """
+    """Base parent class for all Entities. Provides an ordinal
+    :data:`ord` and unique identifier :attr:`id`. Default uses
+    runtime module-level counter for the ordinal and UUID4 for the
+    id.
     """
 
     def __init__(self, **kwa):
-        """Base parent class for all Entities. Provides an ordinal
-        ``ord`` and unique identifier ``id``. Default uses module-level
-        counter for the ordinal and UUID4 for the id. Either can be
-        overridden by passing an ``ord_factory`` and/or ``id_factory``
-        keyword argument.
+        """Either default can be overridden by passing an
+        `ord_factory` and/or `id_factory` keyword argument.
 
-        :param ord_factory:
-        :param id_factory:
-
-        :return:
-
-
+        :param function ord_factory: Ordinal factory Defaults to
+            :func:`next_entity_ord`.
+        :param function id_factory: ID factory Defaults to
+            :func:`uuid.uuid4`.
         """
+
         self.__ord = kwa.pop('ord_factory', next_entity_ord)
         self.__id = kwa.pop('id_factory', uuid.uuid4)
 
     @property
     def ord(self):
-        """Return the ordinal of this entity.
+        """Return the ordinal of this :mod:`entity`. By default this
+        is an integer.
+
+        :rtype: int
+        :return: Runtime or global (if user handled) Ordinal of this
+            entity.
         """
         return self.__ord
 
     @property
     def id(self):
-        """Return the unique identifier of this entity. (By default is
-        a UUID object.
+        """Return the unique identifier of this :mod:`entity`. By
+        default is a :class:`uuid.UUID`.
+
+        :rtype: object
+        :return: By default a UUID object unique ident.
         """
         return self.__id
 
 
 class MRect:
-    """Entity mixin for a ``pygame.Rect`` object.
+    """Entity mixin for a `pygame.Rect`_ object.
 
-    Provides a ``rect`` property. Also provides in place rect transforms.
+    Provides a :data:`rect` property. Also provides in place rect
+    transforms.
     """
 
-    def __init__(self, *args, **kwa):
+    def __init__(self, *rect_args, **kwa):
         """Reset the ``Rect`` object for this Entity.
 
-        :param *rect_args: passed directly to a ``pygame.Rect``
-            constructor
-        :param rect_factory: Rect factory function. This takes
-            precedence over ``*rect_args``
+        :param *rect_args: passed directly to a `pygame.Rect`_
+            constructor.
+        :param bool normalize: Normalize the :data:`rect` on
+            instantiation.
+        :param float parallax_distance: The relative Z coordinate
+            distance for use in parallax calculations.
         """
-        self.__rect = pygame.Rect(*args)
+        self.__rect = pygame.Rect(*rect_args)
 
         if kwa.pop('normalize', False):
             self.__rect.normalize()
@@ -97,18 +112,35 @@ class MRect:
 
     @property
     def rect(self):
-        """Property returning this Entity's rect.
+        """This entity's rectangle.
+
+        :rtype: :class:`pygame.Rect`
         """
         return self.__rect
 
     @property
     def parallax_distance(self):
+        """This entity's parallax_distance.
+
+        :rtype: float
+        """
         return self.__parallax_distance
 
     def move_ip(self, x, y):
+        """Moves this entity's :data:`rect`
+
+        :param int x: Horizontal offset to move the :data:`rect`.
+        :param int y: Vertical offset to move the :data:`rect`.
+        """
         self.__rect = self.__rect.move(x, y)
 
     def inflate_ip(self, x, y):
+        """Inflate or shrink this entity's :data:`rect`. The :data:`rect`
+        remains centered.
+
+        :param int x: Horizontal offset to size the :data:`rect`.
+        :param int y: Vertical offset to size the :data:`rect`.
+        """
         self.__rect = self.__rect.inflate(x, y)
 
     def clamp_ip(self, rect):
@@ -129,27 +161,35 @@ class MRect:
 
 # TODO: Look for relations and differences between .viewport and .rect as implementations are fleshed out.
 class MSurface:
-    """
+    """Entity mixin for a `pygame.Surface`_ object. Provides a
+    :data:`surface` property and a :data:`viewport` property that
+    represents an area of the surface that is rendered.
+
+    Also provides in place surface transforms.
     """
 
     def __init__(self, *surface_args, **kwa):
+        """If only one argument is passed and it is a
+        `pygame.Surface`_ then we set this :data:`surface` to that
+        object.
 
-        """Entity mixin for a ``pygame.Surface`` object.
-
-        Provides a ``surface`` property. Most importantly, provides a
-        ``viewport`` property that represents an area of the surface that is
-        blitted.
-
-        Also provides in place surface transforms.
-
-        If only one argument is passed and it is a ``pygame.Surface`` then we set this surface to that object. Otherwise, we check for a ``surface_factory`` and finally attempt to create a ``pygame.Surface`` using the ``*surface_args``.
-
-        :param surface_args[0]:
-        :param surface_args[]:
-        :param viewport=None:
-        :param convert=True:
-        :param blit_flags=0:
-        :param surface_factory=None:
+        :param pygame.Surface surface_args[0]: Reference to
+            a `pygame.Surface`_ that will be used for this entity.
+        :param *surface_args: If no surface is passed, these args
+            are passed to `pygame.Surface`_ to create the surface
+            for this entity.
+        :param pygame.Rect viewport=None: Reference to
+            a `pygame.Rect`_ object representing the current
+            :data:`viewport` and area of the :data:`surface` to be
+            rendered.
+        :param bool alpha=False: The :data:`surface` has an alpha
+            color channel. (This does nothing unless ``convert=True``
+        :param bool convert=False: Convert the :data:`surface` to
+            optimized for rendering. (Uses `pygame.Surface.convert`_
+            or `pygame.Surface.convert_alpha`_ based on *alpha*
+            keyword argument.)
+        :param int blit_flags=0: The flags to be used when rendering
+            this :data:`surface`. (e.g. :class:`pygame.BLEND_RGBA_ADD`)
         """
 
         viewport = kwa.pop('viewport', None)
@@ -173,73 +213,92 @@ class MSurface:
 
     @property
     def surface(self):
-        """Property returning this surface.
+        """This entity's `pygame.Surface`_ object.
+
+        :rtype: `pygame.Surface`_
         """
 
         return self.__surface
 
     @property
     def image(self):
-        """Property synonym of this surface to enable mixing with
-        deeper ``pygame.sprite`` APIs.
-        """
+        """Synonym of this :data:`surface` to enable mixing with
+        deeper `pygame.sprite`_ APIs.
 
+        :rtype: `pygame.Surface`_
+        """
         return self.surface # Using non-private is intentional here.
 
     @property
     def viewport(self):
+        """This entity's *viewport* `pygame.Rect`_.
+
+        :rtype: `pygame.Rect`_
+        """
+
         return self.__viewport
 
     @property
     def viewport_changed(self):
+        """True if the :data:`viewport` has changed since the last
+        :meth:`update`.
+
+        :rtype: bool
+        """
         return self.__old_viewport != self.__viewport
 
     @property
     def blit_flags(self):
+        """The flags used when rendering this entity.
+
+        :rtype: int
+        """
+
         return self.__blit_flags
 
+    # TODO: Deprecated but good reference.
     def blit_view(self, dest_surface, dest):
         dest_surface.blit(self.image, dest, self.viewport,
                           special_flags=self.blit_flags)
 
     def convert_ip(self, *convert_args, **convert_kwa):
-        """Convert this surface using ``pygame.Surface.convert`` API.
-        http://www.pygame.org/docs/ref/surface.html#pygame.Surface.convert
+        """Convert this surface using `pygame.Surface.convert`_ API.
 
-        :param convert_args:
-        :param convert_kwa:
-        :return:
+        :param *convert_args: Arguments to be passed to the
+            :data:`surface` convert.
+        :param **convert_kwa: Keyword arguments passed to the
+            :data:`surface` convert.
         """
 
         self.__surface = self.surface.convert(*convert_args, **convert_kwa)
 
     def convert_alpha_ip(self, *convert_args, **convert_kwa):
-        """Convert this surface using ``pygame.Surface.convert_alpha``
+        """Convert this surface using `pygame.Surface.convert_alpha`_
         API.
-        http://www.pygame.org/docs/ref/surface.html#pygame.Surface.convert_alpha
 
-        :param convert_args:
-        :param convert_kwa:
-        :return:
+        :param *convert_args: Arguments to be passed to the
+            :data:`surface` convert.
+        :param **convert_kwa: Keyword arguments passed to the
+            :data:`surface` convert.
         """
 
         self.__surface = self.surface.convert_alpha(*convert_args,
                                                     **convert_kwa)
 
     def transform_ip(self, xform_func, *xform_args, **xform_kwa):
-        """Use the ``pygame.transform`` API on this surface.
-        http://www.pygame.org/docs/ref/transform.html
+        """Use the *xform_func* API on this :data:`surface`.
 
-        :param xform_func:
-        :param xform_args:
-        :param xform_kwa:
-        :return:
+        :param `pygame.transform`_ xform_func: Transform function.
+        :param *xform_args: Arguments passed to transform function.
+        :param **xform_kwa: Keyword arguments passed to transform
+            function.
         """
-        old_view_center = self.__viewport.center
         self.__surface = xform_func(self.surface, *xform_args, **xform_kwa)
-        self.__viewport = self.surface.get_rect(center=old_view_center)
 
     def update(self):
+        """
+        """
+
         self.__old_viewport = self.__viewport.copy()
 
 

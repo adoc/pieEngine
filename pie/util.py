@@ -1,17 +1,26 @@
+"""Utility classes and functions.
+"""
+
 from collections import OrderedDict
 
+__all__ = ('fallback_factory', 'OrderedDefaultDict')
 
-__all__ = ('fallback_factories', 'OrderedDefaultDict')
 
+def fallback_factory(*factories):
+    """Return the first of *factories* that is valid callable
+    function.
 
-def fallback_factory(*factories, factory_args=(), factory_kwa={}):
+    :param *factories: Argument list of potential factory functions.
+    :return function: Factory function.
+    """
     for factory in factories:
-        if factory:
-            return factory(*factory_args, **factory_kwa)
+        if factory and callable(factory):
+            return factory
 
 
 class OrderedDefaultDict(OrderedDict):
-    """Simplest OrderedDict and ``defaultdict``-like functionality.
+    """Simple class that provides an OrderedDict and
+    ``defaultdict``-like functionality.
     """
     def __init__(self, factory, *args, **kwa):
         OrderedDict.__init__(self, *args, **kwa)
