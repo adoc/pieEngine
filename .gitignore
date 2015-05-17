@@ -5,3 +5,4 @@ __pycache__
 /env
 /pymunk-4.0.0
 /assets
+/docs/_build

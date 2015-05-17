@@ -96,11 +96,7 @@ class ShipPhysics:
 
         coef_to_dest = local_angle_to_dest / math.pi
 
-
-        ff = (local_destination[0] - local_destination[1]) / 64
-
         # print(ff)
-
 
         # print(coef_to_dest)
 
@@ -115,109 +111,49 @@ class ShipPhysics:
         # print(dest_angle - body_angle)
 
         # Rotation calcs
+        ff = (local_destination[0] - local_destination[1])/32
+        print(ff)
+        self.forward_thrust(ff)
+
+        # Rotational
         mag = 16
         dm = 16
         f = coef_to_dest * mag
         dmp = -dm * abs(coef_to_dest) * self.__body.angular_velocity
 
-        self.forward_thrust(ff)
+        self.rotate_to_starboard(-f)
+        self.rotate_to_port(dmp)
 
-        if coef_to_dest < 0:
-            self.rotate_to_starboard(-f)
-            self.rotate_to_port(dmp)
+        self.aft_port_thrust(-f)
+        self.fore_port_thrust(-f)
+        self.aft_port_thrust(dmp)
+        self.fore_port_thrust(dmp)
 
-            # self.aft_port_thrust(-f2)
-            # self.fore_port_thrust(-f2)
-            #
-            # self.fore_starboard_thrust(-dmp2)
-            # self.aft_starboard_thrust(-dmp2)
+        #self.aft_starboard_thrust(f/2)
+        #self.fore_starboard_thrust(f/2)
 
-        elif coef_to_dest > 0:
-            self.rotate_to_port(f)
-            self.rotate_to_starboard(-dmp)
 
-            # self.aft_starboard_thrust(f2)
-            # self.fore_starboard_thrust(f2)
-            #
-            # self.fore_port_thrust(dmp2)
-            # self.aft_port_thrust(dmp2)
 
-        # self.rotate_to_port(x)
-
-        # if local_angle_to_dest < 0:
-        #     # fv = x * f
-        #     # dm = -fv * self.__body.angular_velocity # * (1 / math.sqrt(1 - (self.__body.angular_velocity / c) ** 2))
+        # if coef_to_dest < 0:
+        #     self.rotate_to_starboard(-f)
+        #     self.rotate_to_port(dmp)
         #
-        #     #lorentz = 1 / math.sqrt(1 - (self.__body.angular_velocity / c) ** 2)
-        #     #print(fv, lorentz)
+        #     # self.aft_port_thrust(-f2)
+        #     # self.fore_port_thrust(-f2)
+        #     #
+        #     # self.fore_starboard_thrust(-dmp2)
+        #     # self.aft_starboard_thrust(-dmp2)
         #
+        # elif coef_to_dest > 0:
+        #     self.rotate_to_port(f)
+        #     self.rotate_to_starboard(-dmp)
         #
-        #     #print("port    %.4f    %.4f" % (fv, dm))
-        #
-        #     self.rotate_to_starboard(-local_angle_to_dest)
-        #     #self.rotate_to_port(dm)
-        #
-        # if local_angle_to_dest > 0:
-        #     fv = x * f
-        #     dm = -fv * -self.__body.angular_velocity
-        #     #print("                      starboard    %.4f    %.4f" % (fv, dm))
-        #
-        #     self.rotate_to_port(local_angle_to_dest)
-        #     #self.rotate_to_starboard(dm)
+        #     # self.aft_starboard_thrust(f2)
+        #     # self.fore_starboard_thrust(f2)
+        #     #
+        #     # self.fore_port_thrust(dmp2)
+        #     # self.aft_port_thrust(dmp2)
 
-
-        # Calculate Distance, Damping and apply forward thrust.
-        # distance = vect_to_destination.get_length()
-        # self.forward_thrust(1)
-        # self.reverse_thrust(1/(distance + 60) * self.__body.velocity)
-
-        # print(1/distance * self.__body.velocity)
-        # print(1/(distance + 60) * self.__body.velocity.get_length())
-        # force = abs(10 * angle_to_destination / math.pi)
-        #
-        #
-        #
-        #
-        #
-        # dampening = -(1 / (self. - angle_to_destination)) * self.__body.angular_velocity
-        #
-        #
-        # if body_angle_to_destination  < 0:
-        #     self.rotate_to_starboard(force)
-        # if body_angle_to_destination  > 0:
-        #     self.rotate_to_port(force)
-
-
-        # Calculate Distance, Damping and apply forward thrust.
-        # distance = vect_to_destination.get_length()
-        # self.forward_thrust(5)
-        # self.reverse_thrust(1/distance * self.__body.velocity)
-
-
-
-        # Calculate Rotation, Dampening and apply rotational thrust.
-
-
-        # print(self.__body.angle.rotated(angle_between))
-
-
-        #print(self.body_angle, rad_to_destination)
-
-        # magix = math.pi - abs(abs(self.__body.angle - rad_to_destination) - math.pi)
-        #
-        # print(magix)
-        #
-        # self.rotate_to_starboard(magix)
-
-        # rad_to_destination = -vect_to_rad(vect_to_destination)
-        # dampening = -(1/(self.body_angle - rad_to_destination)) * self.__body.angular_velocity
-
-        # if self.body_angle > angle_between:
-        #     self.rotate_to_starboard(10)
-        #     #self.rotate_to_port(dampening)
-        # elif self.body_angle < angle_between:
-        #     self.rotate_to_port(10)
-        #     #self.rotate_to_starboard(dampening)
 
     def _reset(self):
         self.__body.reset_forces()
@@ -255,28 +191,28 @@ class Ship(SurfaceSelection, ShipPhysics):
 
         mag = 2
 
-        _keys = pygame.key.get_pressed()
-        if _keys[pygame.K_UP]:
-            self.forward_thrust(mag)
-        elif _keys[pygame.K_DOWN]:
-            self.reverse_thrust(mag)
-
-        if _keys[pygame.K_LSHIFT] and _keys[pygame.K_RIGHT]:
-            self.aft_starboard_thrust(mag/2)
-        elif _keys[pygame.K_RSHIFT] and _keys[pygame.K_RIGHT]:
-            self.fore_starboard_thrust(mag/2)
-        elif _keys[pygame.K_RIGHT]:
-            self.rotate_to_starboard(mag)
-
-        if _keys[pygame.K_LSHIFT] and _keys[pygame.K_LEFT]:
-            self.aft_port_thrust(mag/2)
-        elif _keys[pygame.K_RSHIFT] and _keys[pygame.K_LEFT]:
-            self.fore_port_thrust(mag/2)
-        elif _keys[pygame.K_LEFT]:
-            self.rotate_to_port(mag)
-
-        elif _keys[pygame.K_r]:
-             self._reset()
+        # _keys = pygame.key.get_pressed()
+        # if _keys[pygame.K_UP]:
+        #     self.forward_thrust(mag)
+        # elif _keys[pygame.K_DOWN]:
+        #     self.reverse_thrust(mag)
+        #
+        # if _keys[pygame.K_LSHIFT] and _keys[pygame.K_RIGHT]:
+        #     self.aft_starboard_thrust(mag/2)
+        # elif _keys[pygame.K_RSHIFT] and _keys[pygame.K_RIGHT]:
+        #     self.fore_starboard_thrust(mag/2)
+        # elif _keys[pygame.K_RIGHT]:
+        #     self.rotate_to_starboard(mag)
+        #
+        # if _keys[pygame.K_LSHIFT] and _keys[pygame.K_LEFT]:
+        #     self.aft_port_thrust(mag/2)
+        # elif _keys[pygame.K_RSHIFT] and _keys[pygame.K_LEFT]:
+        #     self.fore_port_thrust(mag/2)
+        # elif _keys[pygame.K_LEFT]:
+        #     self.rotate_to_port(mag)
+        #
+        # elif _keys[pygame.K_r]:
+        #      self._reset()
 
         ShipPhysics.update(self)
 
@@ -367,8 +303,6 @@ class PhysicsDemo(Engine):
             pygame.image.load("assets/composite/sf1_bg_far.png").convert(),
             blit_flags=pygame.BLEND_RGBA_ADD,
             parallax_distance=11))
-        # TODO: isDebug
-        # self.add_render_plain(bombers)
 
         # Physics
         self.__space = pymunk.Space()
@@ -393,7 +327,7 @@ class PhysicsDemo(Engine):
         self.init()
 
         while not self.stopped:
-            self.__space.step(1/(self.target_fps)*4)
+            self.__space.step(1/(self.fps)*4)
             self.update()
             self.clear()
             self.throttle()

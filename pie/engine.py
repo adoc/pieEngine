@@ -196,6 +196,10 @@ class Engine(MRunnable, MIdentity):
     def target_fps(self):
         return self.__target_fps
 
+    @property
+    def fps(self):
+        return self.__clock.get_fps()+1
+
     def init(self, offset=None):
         """
         """

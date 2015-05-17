@@ -1,0 +1,2 @@
+.. automodule:: pie
+   :members:
