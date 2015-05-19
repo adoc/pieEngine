@@ -17,7 +17,8 @@ class _RenderUpdatesMixin:
         for s in self.sprites():
             r = spritedict[s]
             # This is the line updated in order to pass flags.
-            newrect = surface_blit(s.image, s.rect, s.viewport, special_flags=s.blit_flags)
+            newrect = surface_blit(s.image, s.rect, s.viewport,
+                                   special_flags=s.blit_flags)
             if r:
                 if newrect.colliderect(r):
                     dirty_append(newrect.union(r))

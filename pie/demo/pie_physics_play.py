@@ -13,7 +13,7 @@ from pie.base import MRunnable
 from pie.entity.animated import SurfaceSelection
 from pie.entity.background import ParallaxBackground
 from pie.entity.composite import DistributedAnimated
-from pie.entity.image import Image
+from entity.primitive import Image
 from pie.engine import Engine
 
 
@@ -316,8 +316,9 @@ class PhysicsDemo(Engine):
         self.bg_parallax.viewport.topleft = pygame.mouse.get_pos()
 
         if pygame.mouse.get_pressed()[0]:
-            self.add_render_plain(Ship(self.__space, self.assets.animations['ship1'],
-                         rect_kwa={'topleft': (random.randint(0, 1024),random.randint(0, 512))}))
+            self.add_render_plain(Ship(self.__space,
+                                       self.assets.animations['ship1'],
+                                       topleft=(random.randint(0, 1024),random.randint(0, 512))))
 
     def start(self):
         """

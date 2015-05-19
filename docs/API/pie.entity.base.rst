@@ -1,35 +1,24 @@
-pie.entity package
-==================
-
-Submodules
-----------
-
-.. toctree::
-
-   pie.entity.animated
-   pie.entity.background
-   pie.entity.composite
-   pie.entity.image
-   pie.entity.primitive
+pie.entity.base module
+======================
 
 Summary
 -------
 
-.. currentmodule:: pie.entity
+.. currentmodule:: pie.entity.base
 
 .. autosummary::
-    next_entity_ord
-    MIdentity
-    MRect
-    MSurface
-    MSurfaceRect
-    MSprite
+    Rect
+    Surface
+    Sprit
+    SpriteSurface
 
 Contents
 --------
 
-.. automodule:: pie.entity
+.. automodule:: pie.entity.base
     :members:
+    :undoc-members:
+    :inherited-members:
     :show-inheritance:
     :special-members: __init__
 

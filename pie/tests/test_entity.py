@@ -1,6 +1,6 @@
 import unittest
 import uuid
-from entity.animated import MAnimated
+# from entity.animated import MAnimated
 from random import SystemRandom
 
 from pie.entity.primitive import Fill
@@ -38,6 +38,7 @@ class TestModuleFuncs(unittest.TestCase):
         pie.entity._reset_entity_ord(confirm=True)
         self.assertEqual(pie.entity.next_entity_ord(), 1)
 
+
 class TestMIdentity(unittest.TestCase):
     def setUp(self):
         self.__ord = 0
@@ -69,14 +70,6 @@ class TestMIdentity(unittest.TestCase):
             self.assertEqual(entity.ord, self.__ord)
             self.assertEqual(entity.id, self.__id)
 
-    def test_update(self):
-        entity = pie.entity.MIdentity()
-        self.assertRaises(NotImplementedError, entity.update)
-
-    def test_present(self):
-        entity = pie.entity.MIdentity()
-        self.assertRaises(NotImplementedError, entity.present)
-
 
 class TestRectBase(unittest.TestCase):
     @staticmethod
@@ -94,6 +87,7 @@ class TestRectBase(unittest.TestCase):
             self.proto_rect.append(self._rect_factory())
 
 
+# TODO: Needs to be updated.
 class TestMRect(TestRectBase):
     def test_init_ip(self):
         for pr in self.proto_rect:
@@ -128,14 +122,15 @@ class TestMRect(TestRectBase):
             self.assertIsNot(r3.rect, pr)
             self.assertEqual(r3.rect, pr)
 
+            # TODO: Add tests for kwa "normalize" and "parallax_distance"
             # rect_factory
-            r4 = pie.entity.MRect(rect_factory=self._rect_factory)
-            self.assertIsInstance(r4.rect, pygame.Rect)
-            self.assertGreaterEqual(r4.rect.top, 0)
-            self.assertLessEqual(r4.rect.top, 1000)
-            self.assertGreaterEqual(r4.rect.bottom, 0)
-            self.assertLessEqual(r4.rect.bottom, 2000)
-            self.assertGreaterEqual(r4.rect.bottom, r4.rect.top)
+            # r4 = pie.entity.MRect(rect_factory=self._rect_factory)
+            # self.assertIsInstance(r4.rect, pygame.Rect)
+            # self.assertGreaterEqual(r4.rect.top, 0)
+            # self.assertLessEqual(r4.rect.top, 1000)
+            # self.assertGreaterEqual(r4.rect.bottom, 0)
+            # self.assertLessEqual(r4.rect.bottom, 2000)
+            # self.assertGreaterEqual(r4.rect.bottom, r4.rect.top)
 
     def test_move_ip(self):
         for pr in self.proto_rect:
@@ -174,6 +169,21 @@ class TestMRect(TestRectBase):
 
     def test_fit_ip(self):
         assert False
+
+
+class TestMViewport(TestRectBase):
+    """
+    """
+    def test__init__(self):
+        assert False
+
+    def test_viewport_property(self):
+        assert False
+
+    def test_viewport_changed_property(self):
+        assert False
+
+
 
 
 class TestSurfaceEntity(TestRectBase):
@@ -335,117 +345,116 @@ class TestFill(TestRectBase):
             self.assertEqual(byte, 255)
 
 
-class TestMAnimated(unittest.TestCase):
-    def test_init_and_props(self):
-        # Test "regular args.
-        a = MAnimated()
-
-        self.assertEqual(a.start, 0)
-        self.assertEqual(a.end, -1)
-        self.assertEqual(a.count, 0)
-        self.assertEqual(a.playing_count, 0)
-        self.assertEqual(a.interval, 1)
-        self.assertEqual(a.index, 0)
-        self.assertTrue(a.at_start)
-        self.assertTrue(a.at_end)
-        self.assertFalse(a.is_reversed)
-        self.assertTrue(a.is_forward)
-
-        a = MAnimated(count=60)
-
-        self.assertEqual(a.start, 0)
-        self.assertEqual(a.end, 59)
-        self.assertEqual(a.count, 60)
-        self.assertEqual(a.playing_count, 60)
-        self.assertEqual(a.interval, 1)
-        self.assertEqual(a.index, 0)
-        self.assertTrue(a.at_start)
-        self.assertFalse(a.at_end)
-        self.assertFalse(a.is_reversed)
-        self.assertTrue(a.is_forward)
-
-        a = MAnimated(count=60, interval=-1)
-
-        self.assertEqual(a.start, 0)
-        self.assertEqual(a.end, 59)
-        self.assertEqual(a.count, 60)
-        self.assertEqual(a.playing_count, 60)
-        self.assertEqual(a.interval, -1)
-        self.assertEqual(a.index, 0)
-        self.assertTrue(a.at_start)
-        self.assertFalse(a.at_end)
-        self.assertTrue(a.is_reversed)
-        self.assertFalse(a.is_forward)
-
-        a = MAnimated(count=60, interval=-1,
-                                 start=10)
-
-        self.assertEqual(a.start, 10)
-        self.assertEqual(a.end, 59)
-        self.assertEqual(a.count, 60)
-        self.assertEqual(a.playing_count, 50)
-        self.assertEqual(a.interval, -1)
-        self.assertEqual(a.index, 10)
-        self.assertTrue(a.at_start)
-        self.assertFalse(a.at_end)
-        self.assertTrue(a.is_reversed)
-        self.assertFalse(a.is_forward)
-
-        a = MAnimated(count=60, interval=-1,
-                                 start=10, end=20)
-
-        self.assertEqual(a.start, 10)
-        self.assertEqual(a.end, 20)
-        self.assertEqual(a.count, 60)
-        self.assertEqual(a.playing_count, 11)
-        self.assertEqual(a.interval, -1)
-        self.assertEqual(a.index, 10)
-        self.assertTrue(a.at_start)
-        self.assertFalse(a.at_end)
-        self.assertTrue(a.is_reversed)
-        self.assertFalse(a.is_forward)
-
-        # Test irregular args.
-        a = MAnimated(count=60, interval=-1,
-                                 start=20, end=10)
-
-        self.assertEqual(a.start, 20)
-        self.assertEqual(a.end, 10)
-        self.assertEqual(a.count, 60)
-        # Weird result
-        self.assertEqual(a.playing_count, 9)
-        self.assertEqual(a.interval, -1)
-        self.assertEqual(a.index, 20)
-        self.assertTrue(a.at_start)
-        # Another funky result
-        self.assertTrue(a.at_end)
-        self.assertTrue(a.is_reversed)
-        self.assertFalse(a.is_forward)
-
-    def test_prop_at_start(self):
-        assert False
-
-    def test_prop_at_end(self):
-        assert False
-
-    def test_prop_is_reversed(self):
-        assert False
-
-    def test_prop_surface(self):
-        assert False
-
-    def test_advance(self):
-        assert False
-
-    def test_negate_interval(self):
-        assert False
-
-    def test_rewind(self):
-        assert False
-
-    def test_update(self):
-        assert False
-
-    def test_present(self):
-        assert False
-
+# class TestMAnimated(unittest.TestCase):
+#     def test_init_and_props(self):
+#         # Test "regular args.
+#         a = MAnimated()
+#
+#         self.assertEqual(a.start, 0)
+#         self.assertEqual(a.end, -1)
+#         self.assertEqual(a.count, 0)
+#         self.assertEqual(a.playing_count, 0)
+#         self.assertEqual(a.interval, 1)
+#         self.assertEqual(a.index, 0)
+#         self.assertTrue(a.at_start)
+#         self.assertTrue(a.at_end)
+#         self.assertFalse(a.is_reversed)
+#         self.assertTrue(a.is_forward)
+#
+#         a = MAnimated(count=60)
+#
+#         self.assertEqual(a.start, 0)
+#         self.assertEqual(a.end, 59)
+#         self.assertEqual(a.count, 60)
+#         self.assertEqual(a.playing_count, 60)
+#         self.assertEqual(a.interval, 1)
+#         self.assertEqual(a.index, 0)
+#         self.assertTrue(a.at_start)
+#         self.assertFalse(a.at_end)
+#         self.assertFalse(a.is_reversed)
+#         self.assertTrue(a.is_forward)
+#
+#         a = MAnimated(count=60, interval=-1)
+#
+#         self.assertEqual(a.start, 0)
+#         self.assertEqual(a.end, 59)
+#         self.assertEqual(a.count, 60)
+#         self.assertEqual(a.playing_count, 60)
+#         self.assertEqual(a.interval, -1)
+#         self.assertEqual(a.index, 0)
+#         self.assertTrue(a.at_start)
+#         self.assertFalse(a.at_end)
+#         self.assertTrue(a.is_reversed)
+#         self.assertFalse(a.is_forward)
+#
+#         a = MAnimated(count=60, interval=-1,
+#                                  start=10)
+#
+#         self.assertEqual(a.start, 10)
+#         self.assertEqual(a.end, 59)
+#         self.assertEqual(a.count, 60)
+#         self.assertEqual(a.playing_count, 50)
+#         self.assertEqual(a.interval, -1)
+#         self.assertEqual(a.index, 10)
+#         self.assertTrue(a.at_start)
+#         self.assertFalse(a.at_end)
+#         self.assertTrue(a.is_reversed)
+#         self.assertFalse(a.is_forward)
+#
+#         a = MAnimated(count=60, interval=-1,
+#                                  start=10, end=20)
+#
+#         self.assertEqual(a.start, 10)
+#         self.assertEqual(a.end, 20)
+#         self.assertEqual(a.count, 60)
+#         self.assertEqual(a.playing_count, 11)
+#         self.assertEqual(a.interval, -1)
+#         self.assertEqual(a.index, 10)
+#         self.assertTrue(a.at_start)
+#         self.assertFalse(a.at_end)
+#         self.assertTrue(a.is_reversed)
+#         self.assertFalse(a.is_forward)
+#
+#         # Test irregular args.
+#         a = MAnimated(count=60, interval=-1,
+#                                  start=20, end=10)
+#
+#         self.assertEqual(a.start, 20)
+#         self.assertEqual(a.end, 10)
+#         self.assertEqual(a.count, 60)
+#         # Weird result
+#         self.assertEqual(a.playing_count, 9)
+#         self.assertEqual(a.interval, -1)
+#         self.assertEqual(a.index, 20)
+#         self.assertTrue(a.at_start)
+#         # Another funky result
+#         self.assertTrue(a.at_end)
+#         self.assertTrue(a.is_reversed)
+#         self.assertFalse(a.is_forward)
+#
+#     def test_prop_at_start(self):
+#         assert False
+#
+#     def test_prop_at_end(self):
+#         assert False
+#
+#     def test_prop_is_reversed(self):
+#         assert False
+#
+#     def test_prop_surface(self):
+#         assert False
+#
+#     def test_advance(self):
+#         assert False
+#
+#     def test_negate_interval(self):
+#         assert False
+#
+#     def test_rewind(self):
+#         assert False
+#
+#     def test_update(self):
+#         assert False
+#
+#     def test_present(self):
+#         assert False

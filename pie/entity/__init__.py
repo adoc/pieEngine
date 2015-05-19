@@ -1,5 +1,6 @@
 """Entities base classes.
 """
+
 # Might be a bit of overkill but heart is in the right place and
 # implementations have seemed clean.
 #
@@ -17,6 +18,7 @@ from pie.math import vect_diff
 __all__ = ('next_entity_ord',
            'MIdentity',
            'MRect',
+           'MViewport',
            'MSurface',
            'MSurfaceRect',
            'MSprite')
@@ -25,8 +27,9 @@ __all__ = ('next_entity_ord',
 __entity_ord = 0
 def next_entity_ord():
     """Increment the singleton entity ordinal and return it.
-    Note: This is not multi-process safe but should be thread safe.
-    :return int: next entity ordinal.
+    *Note: This is not multi-process safe but should be thread safe.*
+    :rtype:int
+    :return: Next entity ordinal.
     """
     global __entity_ord
     __entity_ord += 1
@@ -36,8 +39,7 @@ def next_entity_ord():
 def _reset_entity_ord(confirm=False):
     """Testing purposes only.
 
-    :param confirm:
-    :return:
+    :param bool confirm: Confirm that we know what we're doing.
     """
     global __entity_ord
     if confirm:
@@ -51,7 +53,7 @@ class MIdentity:
     id.
     """
 
-    def __init__(self, **kwa):
+    def __init__(self, ord_factory=None, id_factory=None):
         """Either default can be overridden by passing an
         `ord_factory` and/or `id_factory` keyword argument.
 
@@ -61,8 +63,8 @@ class MIdentity:
             :func:`uuid.uuid4`.
         """
 
-        self.__ord = kwa.pop('ord_factory', next_entity_ord)
-        self.__id = kwa.pop('id_factory', uuid.uuid4)
+        self.__ord = ord_factory and ord_factory() or next_entity_ord()
+        self.__id = id_factory and id_factory() or uuid.uuid4()
 
     @property
     def ord(self):
@@ -87,13 +89,14 @@ class MIdentity:
 
 
 class MRect:
-    """Entity mixin for a `pygame.Rect`_ object.
+    """Entity mixin for a :class:`pygame.Rect` object.
 
     Provides a :data:`rect` property. Also provides in place rect
     transforms.
     """
 
-    def __init__(self, *rect_args, **kwa):
+    # TODO: Move parallax_distance to MSurfaceRect
+    def __init__(self, *rect_args, normalize=False, parallax_distance=0.0):
         """Reset the ``Rect`` object for this Entity.
 
         :param *rect_args: passed directly to a `pygame.Rect`_
@@ -103,18 +106,19 @@ class MRect:
         :param float parallax_distance: The relative Z coordinate
             distance for use in parallax calculations.
         """
-        self.__rect = pygame.Rect(*rect_args)
+        self.__rect = (rect_args and pygame.Rect(*rect_args) or
+                       pygame.Rect((0, 0), (0, 0)))
 
-        if kwa.pop('normalize', False):
+        if normalize:
             self.__rect.normalize()
 
-        self.__parallax_distance = kwa.pop('parallax_distance', 1.0)
+        self.__parallax_distance = parallax_distance
 
     @property
     def rect(self):
         """This entity's rectangle.
 
-        :rtype: :class:`pygame.Rect`
+        :rtype: `pygame.Rect`_
         """
         return self.__rect
 
@@ -159,6 +163,41 @@ class MRect:
         self.__rect = self.__rect.fit(rect)
 
 
+class MViewport:
+    """
+    """
+
+    def __init__(self, *rect_args):
+        self.__viewport = (rect_args and pygame.Rect(*rect_args) or
+                           pygame.Rect((0, 0), (0, 0)))
+        self.__old_viewport = self.__viewport.copy()
+
+    @property
+    def viewport(self):
+        """This entity's *viewport* `pygame.Rect`_.
+
+        :rtype: `pygame.Rect`_
+        """
+
+        return self.__viewport
+
+    @property
+    def viewport_changed(self):
+        """True if the :data:`viewport` has changed since the last
+        :meth:`update`.
+
+        :rtype: bool
+        """
+
+        return self.__old_viewport != self.__viewport
+
+    def update(self):
+        """Snapshot the current :data:`viewport`. This is used to
+        update the :data:`viewport_changed` property.
+        """
+        self.__old_viewport = self.__viewport.copy()
+
+
 # TODO: Look for relations and differences between .viewport and .rect as implementations are fleshed out.
 class MSurface:
     """Entity mixin for a `pygame.Surface`_ object. Provides a
@@ -168,7 +207,8 @@ class MSurface:
     Also provides in place surface transforms.
     """
 
-    def __init__(self, *surface_args, **kwa):
+    def __init__(self, *surface_args, viewport=None, convert=False, alpha=False,
+                 blit_flags=0):
         """If only one argument is passed and it is a
         `pygame.Surface`_ then we set this :data:`surface` to that
         object.
@@ -192,17 +232,11 @@ class MSurface:
             this :data:`surface`. (e.g. :class:`pygame.BLEND_RGBA_ADD`)
         """
 
-        viewport = kwa.pop('viewport', None)
-        convert = kwa.pop('convert', False)
-        alpha = kwa.pop('alpha', False)
-        blit_flags = kwa.pop('blit_flags', 0)
         if surface_args and isinstance(surface_args[0], pygame.Surface):
             self.__surface = surface_args[0]
         else:
             self.__surface = pygame.Surface(*surface_args)
 
-        self.__viewport = viewport or self.__surface.get_rect()
-        self.__old_viewport = self.__viewport.copy()
         self.__blit_flags = blit_flags
 
         if convert:
@@ -230,24 +264,6 @@ class MSurface:
         return self.surface # Using non-private is intentional here.
 
     @property
-    def viewport(self):
-        """This entity's *viewport* `pygame.Rect`_.
-
-        :rtype: `pygame.Rect`_
-        """
-
-        return self.__viewport
-
-    @property
-    def viewport_changed(self):
-        """True if the :data:`viewport` has changed since the last
-        :meth:`update`.
-
-        :rtype: bool
-        """
-        return self.__old_viewport != self.__viewport
-
-    @property
     def blit_flags(self):
         """The flags used when rendering this entity.
 
@@ -255,11 +271,6 @@ class MSurface:
         """
 
         return self.__blit_flags
-
-    # TODO: Deprecated but good reference.
-    def blit_view(self, dest_surface, dest):
-        dest_surface.blit(self.image, dest, self.viewport,
-                          special_flags=self.blit_flags)
 
     def convert_ip(self, *convert_args, **convert_kwa):
         """Convert this surface using `pygame.Surface.convert`_ API.
@@ -293,25 +304,34 @@ class MSurface:
         :param **xform_kwa: Keyword arguments passed to transform
             function.
         """
+
         self.__surface = xform_func(self.surface, *xform_args, **xform_kwa)
 
-    def update(self):
+
+class MSurfaceRect(MRect, MSurface):
+    """Entity mixin combining :class:`MRect` and :class:`MSurface`.
+    """
+
+    def __init__(self, *surface_args, viewport=None, convert=False,
+                 alpha=False, blit_flags=0, normalize=False,
+                 parallax_distance=0.0, **rect_pos):
+        """The :data:`rect` property will be set to the :data:`surface`
+        rect and passed any *rect_pos* keyword args to adjust the rect.
         """
-        """
-
-        self.__old_viewport = self.__viewport.copy()
-
-
-class MSurfaceRect(MSurface, MRect):
-    def __init__(self, *surface_args, rect_kwa={}, **kwa):
-        MSurface.__init__(self, *surface_args, **kwa)
-        MRect.__init__(self, self.surface.get_rect(**rect_kwa), **kwa)
+        MSurface.__init__(self, *surface_args, viewport=viewport,
+                          convert=convert, alpha=alpha, blit_flags=blit_flags)
+        MRect.__init__(self, self.surface.get_rect(**rect_pos), normalize=normalize,
+                       parallax_distance=parallax_distance)
 
     @property
     def flip_rect(self):
-        """Flipped rectangle coordinates for use in pymunk.
+        """Flipped rectangle coordinates. Generally for use in
+        :mod:`pymunk` or other libraries that normal to the bottom
+        left of the display surface.
 
-        :return:
+        :rtype: `pygame.Rect`_
+        :return: A verticalls flipped copy of this entity's
+            :data:`rect`.
         """
         nr = self.rect.copy()
         nr.top = self.surface.get_height() - nr.top
@@ -319,19 +339,20 @@ class MSurfaceRect(MSurface, MRect):
 
 
 class MSprite(pygame.sprite.Sprite):
-    """MSprite mixin class provides abstract ``collide_func`` prop and
-    ``group_clear`` method.
+    """Entity mixin for `pygame.Sprite`_ that provides
+    :data:`collide_func` property and meth:`group_clear` methods.
     """
 
-    def __init__(self, **kwa):
+    def __init__(self, sprite_groups=(),
+                 collide_func=pygame.sprite.collide_rect):
         """Initialize MSprite.
 
-        :param collide_func: The collision determination function.
-        :return:
+        :param tuple sprite_groups=():
+        :param function collide_func: The collision determination
+            function. Defaults to pygame.sprite.collide_rect
         """
-        pygame.sprite.Sprite.__init__(self, *kwa.pop('sprite_groups', ()))
-        self.__collide_func = kwa.pop('collide_func',
-                                      pygame.sprite.collide_rect)
+        pygame.sprite.Sprite.__init__(self, *sprite_groups)
+        self.__collide_func = collide_func
 
     @property
     def collide_func(self):
@@ -343,14 +364,14 @@ class MSprite(pygame.sprite.Sprite):
         return self.__collide_func
 
     def group_clear(self, surface, rect):
-        """Used ass callback for ``pygame.sprite.Group().clear`` in the
+        """Used as callback for ``pygame.sprite.Group().clear`` in the
         Engine Renderer.
 
-        :param surface: The surface to be partially cleared.
-        :param rect: The rect area to be cleared.
+        :param `pygame.Surface`_ surface: The surface to be partially cleared.
+        :param `pygame.Rect`_ rect: The rect area to be cleared.
         """
 
-        # TODO: Keep an eye on this function. may not work in all cases...
+        # Keep an eye on this function. may not work in all cases...
         # TODO: Check if in any way related to viewport or if viewport can be used.
         surface.blit(self.image, rect, area=rect.move(
             *vect_diff(surface.get_rect().topleft, self.rect.topleft)))

@@ -5,6 +5,7 @@ import pygame.math
 
 import pie._pygame.sprite
 from pie.entity import MIdentity, MSurfaceRect
+from pie.entity.base import *
 from pie.entity.animated import SequenceAnimation
 from pie.math import vect_diff, sinus
 
@@ -129,6 +130,7 @@ def radial_sinusoidal(group, min_radius, max_radius, interval=0):
 #         pass
 
 
+# TODO: Might have been replaced with Viewport
 class MRelativeGroup:
     def __init__(self):
         self.__old_rect = None
@@ -148,7 +150,7 @@ class MRelativeGroup:
         self.__old_rect = self.rect.copy()
 
 
-class DistributedOnce(pie._pygame.sprite.OrderedUpdates, MIdentity, MSurfaceRect,
+class DistributedOnce(pie._pygame.sprite.OrderedUpdates, Rect,
                       MRelativeGroup):
     def __init__(self, *entities,
                  distribute_factory=lambda g, i: radial_sinusoidal(g, 70, 100, interval=i),
@@ -165,7 +167,7 @@ class DistributedOnce(pie._pygame.sprite.OrderedUpdates, MIdentity, MSurfaceRect
     def __update_bounding_rect(self):
         # TODO: Should this happen before and after the distribution??
         sprites = self.sprites()
-        MSurfaceRect.__init__(self, sprites[0].rect.unionall(sprites[1:]))
+        Rect.__init__(self, sprites[0].rect.unionall(sprites[1:]))
 
     def distribute(self, idx=0):
         self.__distribute_factory(self, idx)

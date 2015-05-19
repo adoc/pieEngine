@@ -5,7 +5,7 @@
 import pygame
 
 from pie.entity.background import ParallaxBackground
-from pie.entity.image import Image
+from entity.primitive import Image
 from pie.entity.composite import DistributedAnimated
 from pie.engine import Engine
 
@@ -18,12 +18,10 @@ class ParallaxDemo(Engine):
         bomber1_img = pygame.image.load("assets/bomber10000.png").convert_alpha()
         bomber1_img = pygame.transform.scale(bomber1_img, (32, 32
                                                            ))
-        bombers = DistributedAnimated(*[Image(bomber1_img,
-                                        rect_kwa={'center':(512,256)})
+        bombers = DistributedAnimated(*[Image(bomber1_img, center = (512,256))
                                             for _ in range(10)])
 
-        self.bg_parallax = ParallaxBackground(
-            viewport=pygame.Rect((0, 0), (1024, 512)))
+        self.bg_parallax = ParallaxBackground()
 
         self.bg_parallax.add(
             Image(

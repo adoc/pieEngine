@@ -7,7 +7,7 @@ import pygame
 
 from pie.entity.background import BackgroundImage
 from pie.entity.primitive import Fill
-from pie.entity.image import Image
+from entity.base import Image
 from pie.entity.composite import DistributedOnce, DistributedAnimated
 from pie.engine import Engine
 

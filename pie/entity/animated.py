@@ -1,10 +1,8 @@
 """
 """
 
-import pygame
-
 from pie.asset import get_largest_frame
-from pie.entity import MIdentity, MRect, MSurfaceRect, MSprite
+from pie.entity.base import *
 from pie.animation import AnimationLoop
 
 
@@ -50,8 +48,7 @@ class SequenceAnimation:
 
     @property
     def playing_count(self):
-        return abs(
-                (self.end - self.start + 1) / self.interval)
+        return abs((self.end - self.start + 1) / self.interval)
 
     @property
     def interval(self):
@@ -83,7 +80,7 @@ class SequenceAnimation:
         self.__index += self.interval
         self.__index %= self.count
 
-    def flip(self):
+    def flip_interval(self):
         self.__interval = -self.interval
 
     def reverse(self):
@@ -103,13 +100,9 @@ class SequenceAnimation:
         self.__animation_obj.update(self)
 
 
-class SurfaceSequence(MIdentity, MSurfaceRect, MSprite):
-    def __init__(self, frames, sprite_groups=[], autostart=True, collide_func=None,
-                 **surface_rect_kwa):
-        pygame.sprite.Sprite.__init__(self, *sprite_groups)
-        MIdentity.__init__(self)
-        MSurfaceRect.__init__(self, get_largest_frame(frames), rect_kwa=surface_rect_kwa)
-        MSprite.__init__(self, collide_func=collide_func)
+class SurfaceSequence(SpriteRect):
+    def __init__(self, frames, autostart=True, **kwa):
+        SpriteRect.__init__(self, get_largest_frame(frames), **kwa)
 
         self.__seq = SequenceAnimation(count=len(frames), autostart=autostart)
         self.__frames = tuple(frames) # Not mutable for now.
@@ -122,13 +115,10 @@ class SurfaceSequence(MIdentity, MSurfaceRect, MSprite):
         self.__seq.update()
 
 
-class SurfaceSelection(MIdentity, MSurfaceRect, MSprite):
-    def __init__(self, frames, sprite_groups=[], autostart=True, collide_func=None,
-                 **surface_rect_kwa):
-        pygame.sprite.Sprite.__init__(self, *sprite_groups)
-        MIdentity.__init__(self)
-        MSurfaceRect.__init__(self, get_largest_frame(frames), **surface_rect_kwa)
-        MSprite.__init__(self, collide_func=collide_func)
+class SurfaceSelection(SpriteRect):
+    def __init__(self, frames, autostart=True, **kwa):
+        SpriteRect.__init__(self, get_largest_frame(frames), **kwa)
+
         self.__frames = tuple(frames) # Not mutable for now.
         self.__count = len(self.__frames)
         self.__index = 0
@@ -138,7 +128,7 @@ class SurfaceSelection(MIdentity, MSurfaceRect, MSprite):
         try:
             return self.__frames[self.__index]
         except IndexError:
-            print("fucked frame: %s" % self.__index )
+            print("Missing frame: %s" % self.__index )
 
     def set_frame(self, index):
         index = int(index)
