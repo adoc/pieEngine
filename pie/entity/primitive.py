@@ -9,14 +9,30 @@ __all__ = ('Point', 'Fill', 'Image')
 
 
 class Point(SpriteRect):
-    def __init__(self, pos, radius=0, **kwa):
-        if radius > 5 and not 'collide_func' in kwa:
+    """
+    """
+
+    def __init__(self, pos, radius=0, collide_func=None,
+                 **kwa):
+        """
+
+        :param pos:
+        :param radius:
+        :param kwa:
+        :return:
+        """
+
+        if not collide_func and radius > 0:
             kwa['collide_func'] = pygame.sprite.collide_circle
-        SpriteRect.__init__(self, pos, (0, 0), *kwa)
+
+        SpriteRect.__init__(self, pos, (0, 0), **kwa)
         self.__radius = radius
 
     @property
     def radius(self):
+        """
+        :return: Point radius.
+        """
         return self.__radius
 
 
@@ -46,4 +62,4 @@ class Fill(SpriteSurface):
         self.surface.fill(self.__fill_color)
 
 
-Image = SpriteSurface
+Image = Surface = SpriteSurface

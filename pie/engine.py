@@ -3,7 +3,7 @@ Game Engine.
 """
 
 import pygame.sprite
-
+import entity.group
 
 import pie._pygame.sprite
 from pie.base import MRunnable
@@ -97,7 +97,7 @@ class Engine(MRunnable, MIdentity):
                                         self.__default_bg_surface_factory)())
 
         self.__render_group = fallback_factory(render_group_factory,
-                                            pie._pygame.sprite.OrderedUpdates)()
+                                               entity.group.OrderedEntities)()
         self.__update_group = []
 
         self.__renderer = Renderer(self.__screen, self.__background,

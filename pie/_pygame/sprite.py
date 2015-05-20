@@ -1,13 +1,14 @@
 """
 """
 
-import pygame
 
-
-class _RenderUpdatesMixin:
-    """Method ``draw`` copied directly from
-    ``pygame.sprite.RenderUpdates``
+class RenderUpdatesMixin:
+    """Method :meth:`pygame.sprite.RenderUpdates.draw` copied directly
+    from source and modified to include a `viewport` area for the blit
+    and passing `special_flags` directly from the entitiy/sprite
+    object.
     """
+
     def draw(self, surface):
         spritedict = self.spritedict
         surface_blit = surface.blit
@@ -29,7 +30,3 @@ class _RenderUpdatesMixin:
                 dirty_append(newrect)
             spritedict[s] = newrect
         return dirty
-
-
-class OrderedUpdates(_RenderUpdatesMixin, pygame.sprite.OrderedUpdates):
-    pass

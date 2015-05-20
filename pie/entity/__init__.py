@@ -6,6 +6,8 @@
 #
 # Maybe a little better now!
 
+#TODO: Review for 0.1.2
+
 import uuid
 
 import pygame
@@ -234,8 +236,10 @@ class MSurface:
 
         if surface_args and isinstance(surface_args[0], pygame.Surface):
             self.__surface = surface_args[0]
-        else:
+        elif surface_args:
             self.__surface = pygame.Surface(*surface_args)
+        else:
+            self.__surface = pygame.display.get_surface().copy()
 
         self.__blit_flags = blit_flags
 
@@ -320,8 +324,8 @@ class MSurfaceRect(MRect, MSurface):
         """
         MSurface.__init__(self, *surface_args, viewport=viewport,
                           convert=convert, alpha=alpha, blit_flags=blit_flags)
-        MRect.__init__(self, self.surface.get_rect(**rect_pos), normalize=normalize,
-                       parallax_distance=parallax_distance)
+        MRect.__init__(self, self.surface.get_rect(**rect_pos),
+                       normalize=normalize, parallax_distance=parallax_distance)
 
     @property
     def flip_rect(self):
@@ -344,7 +348,7 @@ class MSprite(pygame.sprite.Sprite):
     """
 
     def __init__(self, sprite_groups=(),
-                 collide_func=pygame.sprite.collide_rect):
+                 collide_func=None):
         """Initialize MSprite.
 
         :param tuple sprite_groups=():
@@ -352,7 +356,7 @@ class MSprite(pygame.sprite.Sprite):
             function. Defaults to pygame.sprite.collide_rect
         """
         pygame.sprite.Sprite.__init__(self, *sprite_groups)
-        self.__collide_func = collide_func
+        self.__collide_func = collide_func or pygame.sprite.collide_rect
 
     @property
     def collide_func(self):

@@ -5,24 +5,29 @@ import functools
 
 import pygame
 
-import pie._pygame.sprite
-
 from pie.entity import MViewport
+from pie.entity.group import OrderedEntities
 from pie.entity.primitive import Fill, Image
 from pie.math import project_3d
 
 
 class BackgroundFill(Fill):
+    """Alias to :class:`pie.entity.primitive.Fill`
+    """
     pass
 
 
 class BackgroundImage(Image):
+    """Alias to :class:`pie.entity.primitive.Image`
+    """
     pass
 
 
-class ParallaxBackground(pie._pygame.sprite.OrderedUpdates, MViewport):
+class ParallaxBackground(OrderedEntities, MViewport):
+    """Provides a parallax background. Pass any number of `entities`
+    that are center aligned. Change the `viewport`
     """
-    """
+
     def __init__(self, *entities, viewport=None):
         """
 
@@ -31,10 +36,14 @@ class ParallaxBackground(pie._pygame.sprite.OrderedUpdates, MViewport):
         """
         MViewport.__init__(self, viewport or
                            pygame.display.get_surface().get_rect())
-        pie._pygame.sprite.OrderedUpdates.__init__(self, *entities)
+        OrderedEntities.__init__(self, *entities)
 
     def update(self, *args):
-        """
+        """Update the viewport position of each contained entity if
+        this viewport has changed. Uses the standard 3D projection
+        function :func:`pie.math.project_3d`
+
+        :param args: Pass-through args.
         """
 
         if self.viewport_changed:
@@ -48,4 +57,4 @@ class ParallaxBackground(pie._pygame.sprite.OrderedUpdates, MViewport):
                 entity.update(self, *args)
             MViewport.update(self, *args)
         else:
-            pie._pygame.sprite.OrderedUpdates.update(self, *args)
+            OrderedEntities.update(self, *args)

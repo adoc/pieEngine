@@ -115,9 +115,9 @@ class SurfaceSequence(SpriteRect):
         self.__seq.update()
 
 
-class SurfaceSelection(SpriteRect):
+class SurfaceSelection(SpriteSurface):
     def __init__(self, frames, autostart=True, **kwa):
-        SpriteRect.__init__(self, get_largest_frame(frames), **kwa)
+        SpriteSurface.__init__(self, get_largest_frame(frames), **kwa)
 
         self.__frames = tuple(frames) # Not mutable for now.
         self.__count = len(self.__frames)

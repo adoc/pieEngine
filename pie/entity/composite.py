@@ -1,3 +1,4 @@
+import entity.group
 import math
 
 import pygame
@@ -150,7 +151,7 @@ class MRelativeGroup:
         self.__old_rect = self.rect.copy()
 
 
-class DistributedOnce(pie._pygame.sprite.OrderedUpdates, Rect,
+class DistributedOnce(entity.group.OrderedEntities, Rect,
                       MRelativeGroup):
     def __init__(self, *entities,
                  distribute_factory=lambda g, i: radial_sinusoidal(g, 70, 100, interval=i),
