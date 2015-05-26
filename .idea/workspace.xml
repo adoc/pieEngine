@@ -4,30 +4,7 @@
     <option name="SCOPE_TYPE" value="3" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ac80f869-bf42-4e72-8e74-d881cc674e6a" name="Default" comment="Prepare for pymunk integration. Tested load time on large animations (360 frame) with transport and it's acceptible for runtime, but perhaps not development.">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pie/demo/pie_msurface_play.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pie/demo/pie_scrolling_bg.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pie/demo/pie_scrolling_parallax.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pie/demo/pymunk_zg_ship.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pie/demo/pymunk_zg_springs.py" />
-      <change type="DELETED" beforePath="C:\Users\coda\PycharmProjects\pieEngine\pie\demo\py_kwa_propagation.py" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\coda\PycharmProjects\pieEngine\pie\demo\pygame_basic.py" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pie/__init__.py" afterPath="$PROJECT_DIR$/pie/__init__.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pie/entity/__init__.py" afterPath="$PROJECT_DIR$/pie/entity/__init__.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pie/entity/animated.py" afterPath="$PROJECT_DIR$/pie/entity/animated.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pie/entity/background.py" afterPath="$PROJECT_DIR$/pie/entity/background.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pie/entity/base.py" afterPath="$PROJECT_DIR$/pie/entity/base.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pie/engine.py" afterPath="$PROJECT_DIR$/pie/engine.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pie/event.py" afterPath="$PROJECT_DIR$/pie/event.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pie/math.py" afterPath="$PROJECT_DIR$/pie/math.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/pieEngine.iml" afterPath="$PROJECT_DIR$/.idea/pieEngine.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pie/demo/pie_bg_parallax.py" afterPath="$PROJECT_DIR$/pie/demo/pie_bg_parallax.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pie/demo/pie_physics_play.py" afterPath="$PROJECT_DIR$/pie/demo/pie_physics_play.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pie/entity/primitive.py" afterPath="$PROJECT_DIR$/pie/entity/primitive.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pie/demo/pymunk_zg_physics.py" afterPath="$PROJECT_DIR$/pie/demo/pymunk_zg_physics.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pie/_pygame/sprite.py" afterPath="$PROJECT_DIR$/pie/_pygame/sprite.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pie/tests/test_entity.py" afterPath="$PROJECT_DIR$/pie/tests/test_entity.py" />
+    <list default="true" id="ac80f869-bf42-4e72-8e74-d881cc674e6a" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="pieEngine.iws" />
@@ -658,7 +635,13 @@
       <option name="project" value="LOCAL" />
       <updated>1431510845883</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Various additional `background` entities. Some not fully fleshed out, but some working decently.&#10;Starting to mess around with surfarrays, but the process of blitting them is agonizingly slow.&#10;Add `visible` attribute to `MSprite` and blit based on `visible`.">
+      <created>1432620071094</created>
+      <option name="number" value="00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1432620071094</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TodoView">
@@ -676,11 +659,12 @@
     <layout>
       <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21428572" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32874617" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="12" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32874617" sideWeight="0.5" order="14" side_tool="true" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.22511485" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32874617" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32110092" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32159266" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.19701493" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32874617" sideWeight="0.5" order="13" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -688,7 +672,6 @@
       <window_info id="PlantUML" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32980332" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="12" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39969373" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -736,7 +719,8 @@
     <MESSAGE value="Overridded some ``pygame`` classes, implemented in ``pie._pygame``. This is to facilitate blitting to an &quot;area&quot; and setting flags in Group draw calls. Unfortunately we have to raw copy pygame code in this case.&#10;&#10;Refactor much of the ``entity`` module, making it more mixin classes than inheritance heirarchy. Updated higher entities to work with this model. Tests are not updated. :( Added ``ParallaxBackground`` class to render entities using a parallax formula.&#10;&#10;Updated bg_parallax demo to use Engine." />
     <MESSAGE value="Added pie.math.project_3d algorithm. Set up BackgroundParallax to use new 3d projection. Added ``parallax_distance`` attribute to MRect based Entities.&#10;&#10;Added py2exe testing. (Works well)&#10;&#10;Update pie_bg_parallax demo" />
     <MESSAGE value="Prepare for pymunk integration. Tested load time on large animations (360 frame) with transport and it's acceptible for runtime, but perhaps not development." />
-    <option name="LAST_COMMIT_MESSAGE" value="Prepare for pymunk integration. Tested load time on large animations (360 frame) with transport and it's acceptible for runtime, but perhaps not development." />
+    <MESSAGE value="Various additional `background` entities. Some not fully fleshed out, but some working decently.&#10;Starting to mess around with surfarrays, but the process of blitting them is agonizingly slow.&#10;Add `visible` attribute to `MSprite` and blit based on `visible`." />
+    <option name="LAST_COMMIT_MESSAGE" value="Various additional `background` entities. Some not fully fleshed out, but some working decently.&#10;Starting to mess around with surfarrays, but the process of blitting them is agonizingly slow.&#10;Add `visible` attribute to `MSprite` and blit based on `visible`." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -945,6 +929,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="2.0554156">
           <caret line="48" column="22" selection-start-line="48" selection-start-column="22" selection-end-line="48" selection-end-column="22" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -952,6 +937,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.84596574">
           <caret line="138" column="17" selection-start-line="138" selection-start-column="17" selection-end-line="138" selection-end-column="17" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -966,6 +952,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="14" column="9" selection-start-line="14" selection-start-column="9" selection-end-line="14" selection-end-column="9" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1016,6 +1003,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.74452555">
           <caret line="18" column="2" selection-start-line="18" selection-start-column="2" selection-end-line="18" selection-end-column="2" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1023,6 +1011,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.6277372">
           <caret line="21" column="27" selection-start-line="21" selection-start-column="27" selection-end-line="21" selection-end-column="27" />
+          <folding />
         </state>
       </provider>
     </entry>
