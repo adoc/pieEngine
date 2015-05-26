@@ -3,12 +3,12 @@ Game Engine.
 """
 
 import pygame.sprite
-import entity.group
 
 import pie._pygame.sprite
 from pie.base import MRunnable
 from pie.clock import RateClock
 from pie.entity import MIdentity
+from pie.entity.group import OrderedEntities
 from pie.entity.background import BackgroundFill
 from pie.asset import AssetHandler
 from pie.event import DragHandler, EventHandler
@@ -51,10 +51,10 @@ class Renderer:
         pygame.display.flip()
 
     def init(self, offset=None):
-        if offset:
-            self.__background.move_ip(*offset)
-            for sprite in self.__group:
-                sprite.move_ip(*offset)
+        # if offset:
+        #     self.__background.move_ip(*offset)
+        #     for sprite in self.__group:
+        #         sprite.move_ip(*offset)
 
         self.__clear_non_static()
         self.__render_non_static()
@@ -97,7 +97,7 @@ class Engine(MRunnable, MIdentity):
                                         self.__default_bg_surface_factory)())
 
         self.__render_group = fallback_factory(render_group_factory,
-                                               entity.group.OrderedEntities)()
+                                               OrderedEntities)()
         self.__update_group = []
 
         self.__renderer = Renderer(self.__screen, self.__background,
@@ -186,14 +186,15 @@ class Engine(MRunnable, MIdentity):
         for entity in entities:
             self.__update_group.append(entity) # This is to track the actual groups being added.
 
-    def update(self):
+    def update(self, *args):
         """
         """
+        # print(len(self.__render_group))
         self.events.update()
         self.drag_handler.update()
 
         for entity in self.__update_group:
-            entity.update()
+            entity.update(*args)
 
     def throttle(self):
         """

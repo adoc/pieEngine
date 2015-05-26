@@ -134,3 +134,6 @@ class SurfaceSelection(SpriteSurface):
         index = int(index)
         index %= self.__count
         self.__index = index
+
+
+# Blurred Surface

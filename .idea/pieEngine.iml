@@ -5,6 +5,7 @@
       <sourceFolder url="file://$MODULE_DIR$/pie" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/.idea" />
       <excludeFolder url="file://$MODULE_DIR$/assets" />
+      <excludeFolder url="file://$MODULE_DIR$/blur" />
       <excludeFolder url="file://$MODULE_DIR$/docs" />
       <excludeFolder url="file://$MODULE_DIR$/docs/_build" />
       <excludeFolder url="file://$MODULE_DIR$/env" />

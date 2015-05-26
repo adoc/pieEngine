@@ -14,11 +14,14 @@ def vect_to_rad(vect):
 def rad_to_vect(rad):
     return pygame.math.Vector2(math.cos(rad), math.sin(rad))
 
-def flip_y_normals(vect, height):
-    return pygame.math.Vector2(vect[0], height - vect[1])
+def flip_y_normals(vect, height, ret_vec=True):
+    if ret_vec:
+        return pygame.math.Vector2(vect[0], height - vect[1])
+    else:
+        return (vect[0], height - vect[1])
 
 def flip_rect_y_normals(rect):
-    return pygame.Rect((rect.x, rect.size[1] - rect.y), rect.size)
+    return pygame.Rect((rect.x, rect.size[1] - rect.o), rect.size)
 
 def sub_size(size1, size2):
     return (size1[0] - size2[0], size1[1] - size2[1])
@@ -71,14 +74,14 @@ def project_3d(point, surface_size=(1000, 1000),
     Based on:
     b(x) = (d(x)s(x)) / (d(z)r(x))r(z)
 
-    b(y) = (d(y)s(y)) / (d(z)r(y))r(z)
+    b(o) = (d(o)s(o)) / (d(z)r(o))r(z)
 
     https://en.wikipedia.org/wiki/3D_projection
 
     :param point:
     :param surface_size:
     :param recording_surface:
-    :return tuple: (x, y) plotted point.
+    :return tuple: (x, o) plotted point.
     """
 
     #:      X Component
@@ -87,3 +90,7 @@ def project_3d(point, surface_size=(1000, 1000),
     #:      Y Component
             (point[1] * surface_size[1]) /
             ((point[2] * recording_surface[1]) * recording_surface[2]))
+
+
+def offset_to_axis(*axis_offsets):
+    return tuple(((abs(o) + o) / 2 , (abs(o) - o) / 2) for o in axis_offsets)

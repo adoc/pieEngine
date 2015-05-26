@@ -34,11 +34,10 @@ class ShipPhysics:
          return math.fmod(self.body_angle * 180 / math.pi, 360)
 
 
-    def __impulse(self, fv, mag, offset=(0,0)):
-        self.__body.reset_forces()
+    def __impulse(self, fv, mag, offset=(0, 0)):
         self.__body.apply_force(
-            self.__body.local_to_world(Vec2d(*fv) * mag).rotated(self.__body.angle),
-            self.__body.local_to_world(Vec2d(*offset)).rotated(self.__body.angle))
+            (Vec2d(*fv) * mag).rotated(self.__body.angle),
+            Vec2d(offset).rotated(self.__body.angle))
 
 
     def forward_thrust(self, mag):
@@ -53,22 +52,22 @@ class ShipPhysics:
 
     #92, 37
     def fore_starboard_thrust(self, mag):
-        self.__impulse((0.1, 1), mag, offset=(16, 0))
+        self.__impulse((0, 1), mag, offset=(16, 0))
         # self.__body.apply_impulse(
         #     (Vec2d(0, 1) * mag).rotated(self.body_angle),self.__body.local_to_world(Vec2d(64, 0).rotated(self.body_angle)))
 
     def fore_port_thrust(self, mag):
-        self.__impulse((-0.1, -1), mag, offset=(16, 0))
+        self.__impulse((-0, -1), mag, offset=(16, 0))
         # self.__body.apply_impulse(
         #     (Vec2d(0, -1) * mag).rotated(self.body_angle),Vec2d(64,0).rotated(self.body_angle))
 
     def aft_starboard_thrust(self, mag):
-        self.__impulse((0.1, 1), mag, offset=(-16, 0))
+        self.__impulse((0, 1), mag, offset=(-16, 0))
         # self.__body.apply_impulse(
         #     (Vec2d(0, 1) * mag).rotated(self.body_angle),Vec2d(-64, 0).rotated(self.body_angle))
 
     def aft_port_thrust(self, mag):
-        self.__impulse((-0.1, -1), mag, offset=(-16, 0))
+        self.__impulse((-0, -1), mag, offset=(-16, 0))
         # self.__body.apply_impulse(
         #     (Vec2d(0, -1) * mag).rotated(self.body_angle),Vec2d(-64,0).rotated(self.body_angle))
 
@@ -81,17 +80,18 @@ class ShipPhysics:
         self.aft_port_thrust(mag)
 
     def update(self):
+        self.__body.reset_forces()
+
         # Update object rect.
         viewport = flip_y_normals(self.__body.position, self.__screen_height)
-
         viewport = Vec2d(viewport[0], viewport[1]) #, viewport.size*2)
+        self.rect.topleft = viewport
 
-        self.rect.bottomleft = viewport
-
+        # Physics stuff
         vect_to_destination = (self._destination -
-                               (self.__body.position)) # + (64, 64))) # 64x64 Offset to center of image.
+                               (self.__body.position + (32,32))) # + (64, 64))) # 64x64 Offset to center of image.
 
-        local_destination = vect_to_destination.rotated(-self.__body.angle)
+        local_destination = vect_to_destination.rotated(self.__body.angle)
 
         local_angle_to_dest = vect_to_rad(local_destination)
 
@@ -112,48 +112,27 @@ class ShipPhysics:
         # print(dest_angle - body_angle)
 
         # Rotation calcs
-        ff = (local_destination[0] - local_destination[1])/32
-        #print(ff)
+        ff = (local_destination[0] - local_destination[1])/self.__body.mass
+
         self.forward_thrust(ff)
 
         # Rotational
-        mag = 16
-        dm = 16
+        mag = self.__body.mass*100
+        dm = self.__body.mass*100
+
+        print(coef_to_dest)
+
         f = coef_to_dest * mag
         dmp = -dm * abs(coef_to_dest) * self.__body.angular_velocity
 
-        self.rotate_to_starboard(-f)
-        self.rotate_to_port(dmp)
+        self.rotate_to_starboard(f)
+        self.rotate_to_starboard(-dmp)
 
         self.aft_port_thrust(-f)
-        self.fore_port_thrust(-f)
         self.aft_port_thrust(dmp)
+
+        self.fore_port_thrust(-f)
         self.fore_port_thrust(dmp)
-
-        #self.aft_starboard_thrust(f/2)
-        #self.fore_starboard_thrust(f/2)
-
-
-
-        # if coef_to_dest < 0:
-        #     self.rotate_to_starboard(-f)
-        #     self.rotate_to_port(dmp)
-        #
-        #     # self.aft_port_thrust(-f2)
-        #     # self.fore_port_thrust(-f2)
-        #     #
-        #     # self.fore_starboard_thrust(-dmp2)
-        #     # self.aft_starboard_thrust(-dmp2)
-        #
-        # elif coef_to_dest > 0:
-        #     self.rotate_to_port(f)
-        #     self.rotate_to_starboard(-dmp)
-        #
-        #     # self.aft_starboard_thrust(f2)
-        #     # self.fore_starboard_thrust(f2)
-        #     #
-        #     # self.fore_port_thrust(dmp2)
-        #     # self.aft_port_thrust(dmp2)
 
 
     def _reset(self):
@@ -173,24 +152,24 @@ class Ship(SurfaceSelection, ShipPhysics):
         #print(flip_y_normals(self.rect,
         #                     self.__screen_height))
 
-        mass = 100
+        mass = 1
         inertia = pymunk.moment_for_box(mass, 46, 18)# 92, 37)
         body = pymunk.Body(mass, inertia)
         body.position = Vec2d(flip_y_normals(self.rect, self.__screen_height))
-        body.angular_velocity_limit = 100
-        body.velocity_limit = 100
+        body.angular_velocity_limit = 1000
+        body.velocity_limit = 1000
 
-        poly = pymunk.Poly.create_box(body, offset=(34.25, 32.75))    #(68.5, 65.5)
+        poly = pymunk.Poly.create_box(body) #, offset=(34.25, 32.75))    #(68.5, 65.5)
         ShipPhysics.__init__(self, space, body, poly)
 
-        self._destination = Vec2d(0,0)
+        self._destination = Vec2d(0, 0)
 
     def update(self):
         SurfaceSelection.update(self)
         self._destination = Vec2d(flip_y_normals(pygame.mouse.get_pos(), self.__screen_height))
         ShipPhysics.update(self)
         # Set rotation image frame.
-        self.set_frame(-self.angle_deg)
+        self.set_frame(self.angle_deg)
 
 
 class PhysicsDemo(Engine):
@@ -224,6 +203,10 @@ class PhysicsDemo(Engine):
 
         # Surprisingly fast load and transform of 360 PNG's for a ship animation.
         self.assets.animations.add_from_zip('ship1', "assets\\anim_ship1.zip", size=(64, 64))
+
+        self.add_render_plain(Ship(self.__space,
+                                   self.assets.animations['ship1'],
+                                   center=(512, 256)))
 
 
     def update(self):

@@ -13,3 +13,7 @@ languages like Java/libGDX.
 
 __author__ = 'Nick Long (https://nicklong.io/craft)'
 __url__ = "https://github.com/adoc/pieEngine"
+
+import pygame
+
+# pygame.surfarray.use_arraytype('numpy')

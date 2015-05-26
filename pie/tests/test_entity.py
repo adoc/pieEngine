@@ -92,7 +92,7 @@ class TestMRect(TestRectBase):
     def test_init_ip(self):
         for pr in self.proto_rect:
             # no init arg.
-            self.assertRaises(TypeError, pie.entity.MRect)
+            self.assertEqual(pie.entity.MRect().rect, pygame.Rect((0,0),(0,0)))
 
             # single init arg (Rect)
             r1 = pie.entity.MRect(pr)
@@ -131,44 +131,6 @@ class TestMRect(TestRectBase):
             # self.assertGreaterEqual(r4.rect.bottom, 0)
             # self.assertLessEqual(r4.rect.bottom, 2000)
             # self.assertGreaterEqual(r4.rect.bottom, r4.rect.top)
-
-    def test_move_ip(self):
-        for pr in self.proto_rect:
-            r = pie.entity.MRect(rect_factory=self._rect_factory)
-            or_topleft = r.rect.topleft
-            or_bottomright = r.rect.bottomright
-            offset = pr.topleft # Not related to the actual topleft.
-            r.move_ip(*offset)
-            self.assertEqual(r.rect.topleft, pie.math.vect_sum(or_topleft,
-                                                          offset))
-            self.assertEqual(r.rect.bottomright, pie.math.vect_sum(or_bottomright,
-                                                          offset))
-
-    def test_inflate_ip(self):
-        for pr in self.proto_rect:
-            r = pie.entity.MRect(rect_factory=self._rect_factory)
-            o_r = r.rect.copy()
-            offset = pr.topleft # Not related to the actual topleft.
-            r.inflate_ip(*offset)
-            self.assertEqual(r.rect.width, o_r.width + offset[0])
-            self.assertEqual(r.rect.height, o_r.height + offset[1])
-            self.assertAlmostEqual(r.rect.center[0], o_r.center[0], delta=1)
-            self.assertAlmostEqual(r.rect.center[1], o_r.center[1], delta=1)
-
-    def test_clamp_ip(self):
-        assert False
-
-    def test_clip_ip(self):
-        assert False
-
-    def test_union_ip(self):
-        assert False
-
-    def test_unionall_ip(self):
-        assert False
-
-    def test_fit_ip(self):
-        assert False
 
 
 class TestMViewport(TestRectBase):

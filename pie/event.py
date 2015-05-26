@@ -5,7 +5,6 @@ from pie.util import OrderedDefaultDict
 from pie.entity.primitive import Point
 from pie.math import vect_diff
 
-
 __all__ = ("EventHandler",
            "DragHandler")
 
@@ -79,8 +78,8 @@ class EventHandler:
         the events queue after callback execution.
         """
         for event in pygame.event.get(list(self.__event_binds.keys())):
-                for callback in self.__event_binds[event.type]:
-                    callback(event)
+            for callback in self.__event_binds[event.type]:
+                callback(event)
         pygame.event.clear()
 
 

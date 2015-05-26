@@ -1,20 +1,17 @@
-"""Entities base classes.
+"""Entity Abstract classes. Generally not implemented by the user.
 """
-
-# Might be a bit of overkill but heart is in the right place and
-# implementations have seemed clean.
-#
-# Maybe a little better now!
 
 #TODO: Review for 0.1.2
 
+import time
 import uuid
+
+import numpy
 
 import pygame
 import pygame.math
 
-# TODO: Check this usage and see if we can remove it from pie.math.
-from pie.math import vect_diff
+from pie.math import vect_diff, offset_to_axis
 
 
 __all__ = ('next_entity_ord',
@@ -22,7 +19,9 @@ __all__ = ('next_entity_ord',
            'MRect',
            'MViewport',
            'MSurface',
+           'MSurfarray',
            'MSurfaceRect',
+           'MSurfarrayRect',
            'MSprite')
 
 
@@ -97,8 +96,8 @@ class MRect:
     transforms.
     """
 
-    # TODO: Move parallax_distance to MSurfaceRect
-    def __init__(self, *rect_args, normalize=False, parallax_distance=0.0):
+    # TODO: Move parallax_distance to MViewport??
+    def __init__(self, *rect_args, normalize=False):
         """Reset the ``Rect`` object for this Entity.
 
         :param *rect_args: passed directly to a `pygame.Rect`_
@@ -114,15 +113,34 @@ class MRect:
         if normalize:
             self.__rect.normalize()
 
-        self.__parallax_distance = parallax_distance
-
     @property
     def rect(self):
         """This entity's rectangle.
 
         :rtype: `pygame.Rect`_
         """
+        #self.__rect = self.__rect.clip(pygame.display.get_surface().get_rect())
         return self.__rect
+
+
+class MViewport:
+    """
+    """
+
+    def __init__(self, *rect_args, parallax_distance=0.0):
+        self.__viewport = (rect_args and pygame.Rect(*rect_args) or
+                           pygame.Rect((0, 0), (0, 0)))
+        self.__old_viewport = self.__viewport.copy()
+        self.__parallax_distance = parallax_distance
+
+    @property
+    def viewport(self):
+        """This entity's *viewport* `pygame.Rect`_.
+
+        :rtype: `pygame.Rect`_
+        """
+        #self.__viewport = self.__viewport.clip(pygame.display.get_surface().get_rect())
+        return self.__viewport
 
     @property
     def parallax_distance(self):
@@ -132,57 +150,6 @@ class MRect:
         """
         return self.__parallax_distance
 
-    def move_ip(self, x, y):
-        """Moves this entity's :data:`rect`
-
-        :param int x: Horizontal offset to move the :data:`rect`.
-        :param int y: Vertical offset to move the :data:`rect`.
-        """
-        self.__rect = self.__rect.move(x, y)
-
-    def inflate_ip(self, x, y):
-        """Inflate or shrink this entity's :data:`rect`. The :data:`rect`
-        remains centered.
-
-        :param int x: Horizontal offset to size the :data:`rect`.
-        :param int y: Vertical offset to size the :data:`rect`.
-        """
-        self.__rect = self.__rect.inflate(x, y)
-
-    def clamp_ip(self, rect):
-        self.__rect = self.__rect.clamp(rect)
-
-    def clip_ip(self, rect):
-        self.__rect = self.__rect.clip(rect)
-
-    def union_ip(self, rect):
-        self.__rect = self.__rect.union(rect)
-
-    def unionall_ip(self, rect_sequence):
-        self.__rect = self.__rect.unionall(rect_sequence)
-
-    def fit_ip(self, rect):
-        self.__rect = self.__rect.fit(rect)
-
-
-class MViewport:
-    """
-    """
-
-    def __init__(self, *rect_args):
-        self.__viewport = (rect_args and pygame.Rect(*rect_args) or
-                           pygame.Rect((0, 0), (0, 0)))
-        self.__old_viewport = self.__viewport.copy()
-
-    @property
-    def viewport(self):
-        """This entity's *viewport* `pygame.Rect`_.
-
-        :rtype: `pygame.Rect`_
-        """
-
-        return self.__viewport
-
     @property
     def viewport_changed(self):
         """True if the :data:`viewport` has changed since the last
@@ -190,26 +157,24 @@ class MViewport:
 
         :rtype: bool
         """
-
         return self.__old_viewport != self.__viewport
 
-    def update(self):
+    def update(self, *args):
         """Snapshot the current :data:`viewport`. This is used to
         update the :data:`viewport_changed` property.
         """
+
         self.__old_viewport = self.__viewport.copy()
 
 
-# TODO: Look for relations and differences between .viewport and .rect as implementations are fleshed out.
 class MSurface:
     """Entity mixin for a `pygame.Surface`_ object. Provides a
-    :data:`surface` property and a :data:`viewport` property that
-    represents an area of the surface that is rendered.
+    :data:`surface` property.
 
-    Also provides in place surface transforms.
+    Also provides in-place surface transforms.
     """
 
-    def __init__(self, *surface_args, viewport=None, convert=False, alpha=False,
+    def __init__(self, *surface_args, convert=False, alpha=False,
                  blit_flags=0):
         """If only one argument is passed and it is a
         `pygame.Surface`_ then we set this :data:`surface` to that
@@ -311,35 +276,68 @@ class MSurface:
 
         self.__surface = xform_func(self.surface, *xform_args, **xform_kwa)
 
+    def blit_to(self, surface):
+        return surface.blit(self.image, self.rect, self.viewport,
+                            special_flags=self.blit_flags)
+
+
+class MSurfarray:
+    def __init__(self, surface, blit_flags=0):
+        self.__surfarray = pygame.surfarray.array2d(surface)
+        self.__orig_surfarray = numpy.copy(self.__surfarray)
+        self.__blit_flags = blit_flags
+
+    @property
+    def surfarray(self):
+        return self.__surfarray
+
+    @property
+    def shape(self):
+        return self.__surfarray.shape
+
+    # numpy.roll is slow, at least when used twice...
+    def offset(self, offset):
+        # Roll original array along the x
+        size_y, size_x = self.shape
+        arr = numpy.roll(self.__orig_surfarray, offset[1] % size_x, 1)
+        arr = numpy.roll(arr, offset[0] % size_y, 0)
+        self.__surfarray = arr
+
+    def blit_to(self, surface):
+        max_size_x, max_size_y = surface.get_rect().size
+        return pygame.surfarray.blit_array(surface,
+                                           self.__surfarray[:max_size_x,
+                                                            :max_size_y])
+
 
 class MSurfaceRect(MRect, MSurface):
     """Entity mixin combining :class:`MRect` and :class:`MSurface`.
     """
 
-    def __init__(self, *surface_args, viewport=None, convert=False,
-                 alpha=False, blit_flags=0, normalize=False,
-                 parallax_distance=0.0, **rect_pos):
+    def __init__(self, *surface_args, convert=False,
+                 alpha=False, blit_flags=0, normalize=False, **rect_pos):
         """The :data:`rect` property will be set to the :data:`surface`
         rect and passed any *rect_pos* keyword args to adjust the rect.
         """
-        MSurface.__init__(self, *surface_args, viewport=viewport,
+        MSurface.__init__(self, *surface_args,
                           convert=convert, alpha=alpha, blit_flags=blit_flags)
         MRect.__init__(self, self.surface.get_rect(**rect_pos),
-                       normalize=normalize, parallax_distance=parallax_distance)
+                       normalize=normalize)
 
-    @property
-    def flip_rect(self):
-        """Flipped rectangle coordinates. Generally for use in
-        :mod:`pymunk` or other libraries that normal to the bottom
-        left of the display surface.
 
-        :rtype: `pygame.Rect`_
-        :return: A verticalls flipped copy of this entity's
-            :data:`rect`.
+class MSurfarrayRect(MRect, MSurfarray):
+    """Entity mixin combining :class:`MRect` and :class:`MSurfarray`.
+    """
+
+    def __init__(self, surface, normalize=False, **rect_pos):
+        """The :data:`rect` property will be set to the :data:`surface`
+        rect and passed any *rect_pos* keyword args to adjust the rect.
         """
-        nr = self.rect.copy()
-        nr.top = self.surface.get_height() - nr.top
-        return nr
+        MSurfarray.__init__(self, surface)
+        MRect.__init__(self, (0, 0), self.shape[:2],
+                       normalize=normalize)
+        for k, v in rect_pos.items():
+            setattr(self.rect, k, v)
 
 
 class MSprite(pygame.sprite.Sprite):
@@ -357,6 +355,7 @@ class MSprite(pygame.sprite.Sprite):
         """
         pygame.sprite.Sprite.__init__(self, *sprite_groups)
         self.__collide_func = collide_func or pygame.sprite.collide_rect
+        self.visible = True
 
     @property
     def collide_func(self):

@@ -16,17 +16,19 @@ class RenderUpdatesMixin:
         self.lostsprites = []
         dirty_append = dirty.append
         for s in self.sprites():
-            r = spritedict[s]
-            # This is the line updated in order to pass flags.
-            newrect = surface_blit(s.image, s.rect, s.viewport,
-                                   special_flags=s.blit_flags)
-            if r:
-                if newrect.colliderect(r):
-                    dirty_append(newrect.union(r))
+            if s.visible:
+                r = spritedict[s]
+                # This is the line updated in order to pass flags.
+                # newrect = surface_blit(s.image, s.rect, s.viewport,
+                #                        special_flags=s.blit_flags)
+                newrect = s.blit_to(surface)
+                if r:
+                    if newrect.colliderect(r):
+                        dirty_append(newrect.union(r))
+                    else:
+                        dirty_append(newrect)
+                        dirty_append(r)
                 else:
                     dirty_append(newrect)
-                    dirty_append(r)
-            else:
-                dirty_append(newrect)
-            spritedict[s] = newrect
+                spritedict[s] = newrect
         return dirty

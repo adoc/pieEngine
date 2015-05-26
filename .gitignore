@@ -7,3 +7,4 @@ __pycache__
 /assets
 /docs/_build
 /pygame
+/blur

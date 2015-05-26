@@ -46,6 +46,7 @@ class ParallaxDemo(Engine):
     def update(self):
         Engine.update(self)
         self.bg_parallax.viewport.topleft = pygame.mouse.get_pos()
+        print(self.fps)
 
 
 if __name__ == "__main__":
