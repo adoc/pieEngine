@@ -276,6 +276,7 @@ class MSurface:
 
         self.__surface = xform_func(self.surface, *xform_args, **xform_kwa)
 
+    # TODO: Move to MSurfaceRect
     def blit_to(self, surface):
         return surface.blit(self.image, self.rect, self.viewport,
                             special_flags=self.blit_flags)
@@ -366,6 +367,7 @@ class MSprite(pygame.sprite.Sprite):
 
         return self.__collide_func
 
+    # TODO: Move to SpriteSurface??
     def group_clear(self, surface, rect):
         """Used as callback for ``pygame.sprite.Group().clear`` in the
         Engine Renderer.
@@ -378,3 +380,8 @@ class MSprite(pygame.sprite.Sprite):
         # TODO: Check if in any way related to viewport or if viewport can be used.
         surface.blit(self.image, rect, area=rect.move(
             *vect_diff(surface.get_rect().topleft, self.rect.topleft)))
+
+
+class MText:
+    def __init__(self, family="helvetica"):
+        pass

@@ -60,6 +60,6 @@ class ScrollingBgDemo(Engine):
 if __name__ == "__main__":
     pygame.init()
     game = ScrollingBgDemo(pygame.display.set_mode((1024, 512), 0, 32),
-                       non_static_background=True, target_fps=120)
+                       non_static_background=True, target_fps=300)
 
     game.start()

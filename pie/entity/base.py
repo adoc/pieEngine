@@ -93,3 +93,19 @@ class SpriteSurfarray(MIdentity, MSprite, MViewport, MSurfarrayRect):
     #     return pygame.surfarray.blit_array(surface,
     #                                        surfarray[:max_size_x,
     #                                                         :max_size_y])
+
+
+class TextSurface(MIdentity, MSprite, MViewport, MSurfaceRect):
+    def __init__(self, *surface_args, viewport=None, convert=False,
+                 alpha=False, blit_flags=0, normalize=False,
+                 parallax_distance=0.0, sprite_groups=(), collide_func=None,
+                 ord_factory=None, id_factory=None, **rect_pos):
+        MSurfaceRect.__init__(self, *surface_args,
+                              convert=convert, alpha=alpha,
+                              blit_flags=blit_flags, normalize=normalize,
+                              **rect_pos)
+        MViewport.__init__(self, viewport or self.surface.get_rect(),
+                           parallax_distance=parallax_distance)
+        MSprite.__init__(self, sprite_groups=sprite_groups,
+                         collide_func=collide_func)
+        MIdentity.__init__(self, ord_factory=ord_factory, id_factory=id_factory)

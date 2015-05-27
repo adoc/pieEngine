@@ -133,178 +133,178 @@ class TestMRect(TestRectBase):
             # self.assertGreaterEqual(r4.rect.bottom, r4.rect.top)
 
 
-class TestMViewport(TestRectBase):
-    """
-    """
-    def test__init__(self):
-        assert False
-
-    def test_viewport_property(self):
-        assert False
-
-    def test_viewport_changed_property(self):
-        assert False
-
-
-
-
-class TestSurfaceEntity(TestRectBase):
-    def test_init(self):
-        for pr in self.proto_rect:
-            # no arg.
-            self.assertRaises(TypeError, pie.entity.MSurface)
-
-            # one arg
-            s = pie.entity.MSurface(pr.size)
-            self.assertEqual(s.surface.get_size(), pr.size)
-
-            # two args
-            s = pie.entity.MSurface(pr.size, 0)
-            self.assertEqual(s.surface.get_flags(), 0)
-            s = pie.entity.MSurface(pr.size, pygame.SRCALPHA)
-            self.assertEqual(s.surface.get_flags(), pygame.SRCALPHA)
-
-            # three args
-            s = pie.entity.MSurface(pr.size, 0, 8)
-            self.assertEqual(s.surface.get_bitsize(), 8)
-            s = pie.entity.MSurface(pr.size, 0, 16)
-            self.assertEqual(s.surface.get_bitsize(), 16)
-            s = pie.entity.MSurface(pr.size, 0, 24)
-            self.assertEqual(s.surface.get_bitsize(), 24)
-            s = pie.entity.MSurface(pr.size, 0, 32)
-            self.assertEqual(s.surface.get_bitsize(), 32)
-
-            # surface factory
-            s = pie.entity.MSurface(surface_factory=
-                              lambda: pygame.Surface(pr.size))
-            self.assertEqual(s.surface.get_size(), pr.size)
-
-
-    def test_surface_convert(self):
-        # TODO: Possibly incomplete test coverage
-        pygame.init()
-        for pr in self.proto_rect:
-            so = pygame.Surface(pr.size, 0, 8)
-
-            s1 = pie.entity.MSurfaceRect(pr.size, pygame.HWSURFACE, 32)
-            s1.convert_ip(so)
-
-            self.assertEqual(s1.surface.get_flags(), 0)
-            self.assertEqual(s1.surface.get_bitsize(), 8)
-
-    def test_surface_convert_alpha(self):
-        # TODO: Possibly incomplete test coverage
-        pygame.init()
-        pygame.display.set_mode((100,100), pygame.SRCALPHA, 32)
-        for pr in self.proto_rect:
-            so = pygame.Surface(pr.size, pygame.SRCALPHA, 32)
-
-            s1 = pie.entity.MSurfaceRect(pr.size, 0, 24)
-            s1.convert_alpha_ip(so)
-
-            self.assertEqual(s1.surface.get_flags(), pygame.SRCALPHA)
-            self.assertEqual(s1.surface.get_bitsize(), 32)
-
-
-class TestSurfaceRectEntity(TestRectBase):
-    def test_init(self):
-        for pr in self.proto_rect:
-            pr_r = self.proto_rect[self.frndi(len(self.proto_rect))]
-            # no arg.
-            self.assertRaises(TypeError, pie.entity.MSurfaceRect)
-
-            # one arg
-            s = pie.entity.MSurfaceRect(pr.size)
-            self.assertEqual(s.surface.get_size(), pr.size)
-            self.assertIsNot(s.rect, pr)
-            self.assertEqual(s.rect.size, pr.size)
-
-            # one arg (rect_kwa)
-            s = pie.entity.MSurfaceRect(pr.size, center=pr.center)
-            self.assertEqual(s.surface.get_size(), pr.size)
-            self.assertIsNot(s.rect, pr)
-            self.assertEqual(s.rect, pr)
-
-            s = pie.entity.MSurfaceRect(pr.size, topleft=pr.topleft)
-            self.assertEqual(s.surface.get_size(), pr.size)
-            self.assertIsNot(s.rect, pr)
-            self.assertEqual(s.rect, pr)
-
-            # two args
-            s = pie.entity.MSurfaceRect(pr.size, 0)
-            self.assertEqual(s.surface.get_flags(), 0)
-            s = pie.entity.MSurfaceRect(pr.size, pygame.SRCALPHA)
-            self.assertEqual(s.surface.get_flags(), pygame.SRCALPHA)
-            
-            # three args
-            s = pie.entity.MSurfaceRect(pr_r.size, 0, 8)
-            self.assertEqual(s.surface.get_bitsize(), 8)
-            s = pie.entity.MSurfaceRect(pr_r.size, 0, 16)
-            self.assertEqual(s.surface.get_bitsize(), 16)
-            s = pie.entity.MSurfaceRect(pr_r.size, 0, 24)
-            self.assertEqual(s.surface.get_bitsize(), 24)
-            s = pie.entity.MSurfaceRect(pr_r.size, 0, 32)
-            self.assertEqual(s.surface.get_bitsize(), 32)
-
-            # surface factory
-            s = pie.entity.MSurfaceRect(surface_factory=
-                                    lambda: pygame.Surface(pr.size),
-                                  center=pr.center)
-            self.assertEqual(s.surface.get_size(), pr.size)
-            self.assertIsNot(s.rect, pr)
-            self.assertEqual(s.rect, pr)
-
-    def test_rect_inflate(self):
-        assert False
-
-    def test_rect_clamp(self):
-        assert False
-
-    def test_rect_clip(self):
-        assert False
-
-    def test_rect_union(self):
-        assert False
-
-    def test_rect_unionall(self):
-        assert False
-
-    def test_rect_fit(self):
-        assert False
-
-
-class TestPointEntity(unittest.TestCase):
-    def test__init__(self):
-        assert False
-
-
-class TestSpriteEntity(unittest.TestCase):
-    def test_init(self):
-        assert False
-
-
-class TestDirtySpriteEntity(unittest.TestCase):
-    def test_init(self):
-        assert False
-
-
-class TestDrawSurfaceEntity(unittest.TestCase):
-    def test_init(self):
-        assert False
-
-
-class TestFill(TestRectBase):
-    def test_init(self):
-        pass
-
-    def test_update(self):
-        s = Fill((100,100), 0, 24)
-        for byte in s.surface.get_buffer().raw:
-            self.assertEqual(byte, 0)
-
-        s = Fill((100,100), 0, 24, fill_color=(255,255,255))
-        for byte in s.surface.get_buffer().raw:
-            self.assertEqual(byte, 255)
+# class TestMViewport(TestRectBase):
+#     """
+#     """
+#     def test__init__(self):
+#         assert False
+#
+#     def test_viewport_property(self):
+#         assert False
+#
+#     def test_viewport_changed_property(self):
+#         assert False
+#
+#
+#
+#
+# class TestSurfaceEntity(TestRectBase):
+#     def test_init(self):
+#         for pr in self.proto_rect:
+#             # no arg.
+#             self.assertRaises(TypeError, pie.entity.MSurface)
+#
+#             # one arg
+#             s = pie.entity.MSurface(pr.size)
+#             self.assertEqual(s.surface.get_size(), pr.size)
+#
+#             # two args
+#             s = pie.entity.MSurface(pr.size, 0)
+#             self.assertEqual(s.surface.get_flags(), 0)
+#             s = pie.entity.MSurface(pr.size, pygame.SRCALPHA)
+#             self.assertEqual(s.surface.get_flags(), pygame.SRCALPHA)
+#
+#             # three args
+#             s = pie.entity.MSurface(pr.size, 0, 8)
+#             self.assertEqual(s.surface.get_bitsize(), 8)
+#             s = pie.entity.MSurface(pr.size, 0, 16)
+#             self.assertEqual(s.surface.get_bitsize(), 16)
+#             s = pie.entity.MSurface(pr.size, 0, 24)
+#             self.assertEqual(s.surface.get_bitsize(), 24)
+#             s = pie.entity.MSurface(pr.size, 0, 32)
+#             self.assertEqual(s.surface.get_bitsize(), 32)
+#
+#             # surface factory
+#             s = pie.entity.MSurface(surface_factory=
+#                               lambda: pygame.Surface(pr.size))
+#             self.assertEqual(s.surface.get_size(), pr.size)
+#
+#
+#     def test_surface_convert(self):
+#         # TODO: Possibly incomplete test coverage
+#         pygame.init()
+#         for pr in self.proto_rect:
+#             so = pygame.Surface(pr.size, 0, 8)
+#
+#             s1 = pie.entity.MSurfaceRect(pr.size, pygame.HWSURFACE, 32)
+#             s1.convert_ip(so)
+#
+#             self.assertEqual(s1.surface.get_flags(), 0)
+#             self.assertEqual(s1.surface.get_bitsize(), 8)
+#
+#     def test_surface_convert_alpha(self):
+#         # TODO: Possibly incomplete test coverage
+#         pygame.init()
+#         pygame.display.set_mode((100,100), pygame.SRCALPHA, 32)
+#         for pr in self.proto_rect:
+#             so = pygame.Surface(pr.size, pygame.SRCALPHA, 32)
+#
+#             s1 = pie.entity.MSurfaceRect(pr.size, 0, 24)
+#             s1.convert_alpha_ip(so)
+#
+#             self.assertEqual(s1.surface.get_flags(), pygame.SRCALPHA)
+#             self.assertEqual(s1.surface.get_bitsize(), 32)
+#
+#
+# class TestSurfaceRectEntity(TestRectBase):
+#     def test_init(self):
+#         for pr in self.proto_rect:
+#             pr_r = self.proto_rect[self.frndi(len(self.proto_rect))]
+#             # no arg.
+#             self.assertRaises(TypeError, pie.entity.MSurfaceRect)
+#
+#             # one arg
+#             s = pie.entity.MSurfaceRect(pr.size)
+#             self.assertEqual(s.surface.get_size(), pr.size)
+#             self.assertIsNot(s.rect, pr)
+#             self.assertEqual(s.rect.size, pr.size)
+#
+#             # one arg (rect_kwa)
+#             s = pie.entity.MSurfaceRect(pr.size, center=pr.center)
+#             self.assertEqual(s.surface.get_size(), pr.size)
+#             self.assertIsNot(s.rect, pr)
+#             self.assertEqual(s.rect, pr)
+#
+#             s = pie.entity.MSurfaceRect(pr.size, topleft=pr.topleft)
+#             self.assertEqual(s.surface.get_size(), pr.size)
+#             self.assertIsNot(s.rect, pr)
+#             self.assertEqual(s.rect, pr)
+#
+#             # two args
+#             s = pie.entity.MSurfaceRect(pr.size, 0)
+#             self.assertEqual(s.surface.get_flags(), 0)
+#             s = pie.entity.MSurfaceRect(pr.size, pygame.SRCALPHA)
+#             self.assertEqual(s.surface.get_flags(), pygame.SRCALPHA)
+#
+#             # three args
+#             s = pie.entity.MSurfaceRect(pr_r.size, 0, 8)
+#             self.assertEqual(s.surface.get_bitsize(), 8)
+#             s = pie.entity.MSurfaceRect(pr_r.size, 0, 16)
+#             self.assertEqual(s.surface.get_bitsize(), 16)
+#             s = pie.entity.MSurfaceRect(pr_r.size, 0, 24)
+#             self.assertEqual(s.surface.get_bitsize(), 24)
+#             s = pie.entity.MSurfaceRect(pr_r.size, 0, 32)
+#             self.assertEqual(s.surface.get_bitsize(), 32)
+#
+#             # surface factory
+#             s = pie.entity.MSurfaceRect(surface_factory=
+#                                     lambda: pygame.Surface(pr.size),
+#                                   center=pr.center)
+#             self.assertEqual(s.surface.get_size(), pr.size)
+#             self.assertIsNot(s.rect, pr)
+#             self.assertEqual(s.rect, pr)
+#
+#     def test_rect_inflate(self):
+#         assert False
+#
+#     def test_rect_clamp(self):
+#         assert False
+#
+#     def test_rect_clip(self):
+#         assert False
+#
+#     def test_rect_union(self):
+#         assert False
+#
+#     def test_rect_unionall(self):
+#         assert False
+#
+#     def test_rect_fit(self):
+#         assert False
+#
+#
+# class TestPointEntity(unittest.TestCase):
+#     def test__init__(self):
+#         assert False
+#
+#
+# class TestSpriteEntity(unittest.TestCase):
+#     def test_init(self):
+#         assert False
+#
+#
+# class TestDirtySpriteEntity(unittest.TestCase):
+#     def test_init(self):
+#         assert False
+#
+#
+# class TestDrawSurfaceEntity(unittest.TestCase):
+#     def test_init(self):
+#         assert False
+#
+#
+# class TestFill(TestRectBase):
+#     def test_init(self):
+#         pass
+#
+#     def test_update(self):
+#         s = Fill((100,100), 0, 24)
+#         for byte in s.surface.get_buffer().raw:
+#             self.assertEqual(byte, 0)
+#
+#         s = Fill((100,100), 0, 24, fill_color=(255,255,255))
+#         for byte in s.surface.get_buffer().raw:
+#             self.assertEqual(byte, 255)
 
 
 # class TestMAnimated(unittest.TestCase):
@@ -420,3 +420,10 @@ class TestFill(TestRectBase):
 #
 #     def test_present(self):
 #         assert False
+
+
+class TestMText(unittest.TestCase):
+
+    def test___init__(self):
+            mt = pie.entity.MText()
+            assert False

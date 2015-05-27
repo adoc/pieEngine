@@ -1,3 +1,6 @@
+"""Event based classes.
+"""
+
 import pygame
 import pygame.math
 
@@ -9,6 +12,7 @@ __all__ = ("EventHandler",
            "DragHandler")
 
 
+# TODO: add sub-handlers for key and other events with dict arguments.
 class EventHandler:
     """EventHandler class providing Event bindings and user events.
     """
