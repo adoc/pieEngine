@@ -2,75 +2,32 @@
 Game Engine.
 """
 
-import pygame.sprite
+import pygame
 
-import pie._pygame.sprite
-from pie.base import MRunnable
+from pie import MRunnable, MIdentity
+
 from pie.clock import RateClock
-from pie.entity import MIdentity
+
 from pie.entity.group import OrderedEntities
 from pie.entity.background import BackgroundFill
 from pie.asset import AssetHandler
 from pie.event import DragHandler, EventHandler
 from pie.math import vect_diff
 from pie.util import fallback_factory
+from pie.render import Renderer
 
-__all__ = ("Renderer", "Engine")
-
-
-# TODO: Refactoring [#3]
-class Renderer:
-    """
-    """
-    def __init__(self, screen, background, group,
-                 non_static_background=False):
-        self.__screen = screen
-
-        self.__background = background # How do we handle backgrounds?? [#3]
-        self.__group = group # Does this stay a group of sprites only? [#3]
-        # Do we add the "list of groups" abstract here? [#3]
-
-        if non_static_background:
-            self.render = self.__render_non_static
-            self.clear = self.__clear_non_static
-        else:
-            self.render = self.__render_static
-            self.clear = self.__clear_static
-
-    def __clear_static(self):
-        self.__group.clear(self.__screen, self.__background.group_clear)
-
-    def __clear_non_static(self):
-        self.__screen.blit(self.__background.image, self.__background.rect)
-
-    def __render_static(self):
-        pygame.display.update(self.__group.draw(self.__screen))
-
-    def __render_non_static(self):
-        self.__group.draw(self.__screen)
-        pygame.display.flip()
-
-    def init(self, offset=None):
-        # if offset:
-        #     self.__background.move_ip(*offset)
-        #     for sprite in self.__group:
-        #         sprite.move_ip(*offset)
-
-        self.__clear_non_static()
-        self.__render_non_static()
-        pygame.display.flip()
+__all__ = ("Engine",)
 
 
-class Engine(MRunnable, MIdentity):
+class Engine(MIdentity, MRunnable):
     """Game enging base class. Any game implementations will subclass
     from this.
     """
 
-    def __init__(self, screen, clock_factory=None,
-                 clock_accurate=False, target_fps=60,
+    def __init__(self, screen=None, init_pygame=True, clock_factory=None,
                  debug=False, background_factory=None,
                  render_group_factory=None,
-                 non_static_background=False, auto_start=True):
+                 static_background=True, auto_start=False):
         """
 
         :param pygame.Surface: Pygame screen this ``Engine`` is rendering to.
@@ -82,27 +39,30 @@ class Engine(MRunnable, MIdentity):
         MRunnable.__init__(self, auto_start=auto_start)
         MIdentity.__init__(self)
 
+        if init_pygame:
+            pygame.init()
+
         self.__debug = debug
-        self.__target_fps = target_fps
 
         self.__screen = (isinstance(screen, pygame.Surface) and screen or
                                     fallback_factory(screen,
                                          self.__default_screen_factory)())
 
         self.__clock = (fallback_factory(clock_factory,
-                                         lambda: RateClock(target_fps,
-                                                    accurate=clock_accurate))())
+                                         lambda: RateClock(2000,
+                                                    accurate=False))())
 
         self.__background = (fallback_factory(background_factory,
                                         self.__default_bg_surface_factory)())
 
+        # Reference to the iterator of sprites to be blitted.
         self.__render_group = fallback_factory(render_group_factory,
                                                OrderedEntities)()
         self.__update_group = []
 
         self.__renderer = Renderer(self.__screen, self.__background,
                                    self.__render_group,
-                                   non_static_background=non_static_background)
+                                   static_background=static_background)
 
         # Set up subsystems.
         self.__assets = AssetHandler(self.__screen)
@@ -168,12 +128,8 @@ class Engine(MRunnable, MIdentity):
         return self.__screen_height
 
     @property
-    def target_fps(self):
-        return self.__target_fps
-
-    @property
     def fps(self):
-        return self.__clock.framerate + 1
+        return self.__clock.framerate
 
     def init(self, offset=None):
         """
@@ -181,10 +137,13 @@ class Engine(MRunnable, MIdentity):
         self.__renderer.init(offset=offset)
 
     def add_render_plain(self, *entities):
-        # This by way of pygame will break out the contained sprites.
+        # The entities, by way of :mod:`pygame`, will break out the contained
+        # sprites.
         self.__render_group.add(*entities)
         for entity in entities:
-            self.__update_group.append(entity) # This is to track the actual groups being added.
+            self.__update_group.append(entity) # This is to track the
+                                               # actual groups being
+                                               # added.
 
     def update(self, *args):
         """

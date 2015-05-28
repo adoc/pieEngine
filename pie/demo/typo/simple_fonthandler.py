@@ -9,15 +9,15 @@ if __name__ == '__main__':
     pygame.init()
     pygame.font.init()
 
-    fh = pie.typo.FontHandler()
+    fh = pie.typo.FontHandler(default_flags=pie.typo.ANTIALIAS)
     # Engine
     s = pygame.display.set_mode((1024, 512), 0, 32)
     e = pie.engine.Engine(s)
 
     d_font = fh.get_font('_debug', 24, flags=pie.typo.UNDERLINE)
 
-    fonts = (fh.get_font('montserrat', 18, flags=pie.typo.REGULAR),
-             fh.get_font('montserrat', 18, flags=pie.typo.BOLD | pie.typo.UNDERLINE),
+    fonts = (fh.get_font('montserrat', 18),
+             fh.get_font('montserrat', 18, flags=pie.typo.BOLD),
              fh.get_font('montserrat', 18, flags=pie.typo.ITALIC),
              )
 
@@ -29,12 +29,8 @@ if __name__ == '__main__':
     grey = (200, 200, 200)
     for f in fonts:
         col = []
-        col.append(d_font.render("Not-antialiased", True, grey))
-        col.append(f.render(text1, False, white))
-        col.append(f.render(text2, False, white))
-        col.append(d_font.render("Antialiased", True, grey))
-        col.append(f.render(text1, True, white))
-        col.append(f.render(text2, True, white))
+        col.append(f.render(text1, white))
+        col.append(f.render(text2, white))
 
         max_x = 0
         max_y = 0

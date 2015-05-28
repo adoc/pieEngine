@@ -24,7 +24,7 @@ class Ship(SpriteRect):
         self.__body.position = pymunk.Vec2d(position)
         self.__body.angular_velocity_limit = 100
         self.__body.velocity_limit = 100
-        self.__body.velocity_func = self.velocity_func
+        #self.__body.velocity_func = self.velocity_func
 
         self.__poly = pymunk.Poly.create_box(self.__body, size=self.rect.size)
         self.__poly.color = pygame.color.THECOLORS['whitesmoke']

@@ -1,18 +1,17 @@
 """
-
 """
+
 import random
 import math
 
 import pygame
 import pymunk
+
 from pymunk import Vec2d
 
-from pie.math import flip_rect_y_normals, flip_y_normals, vect_diff, vect_to_rad
-from pie.base import MRunnable
+from pie.math import flip_y_normals, vect_to_rad
 from pie.entity.animated import SurfaceSelection
 from pie.entity.background import ParallaxBackground
-from pie.entity.composite import DistributedAnimated
 from entity.primitive import Image
 from pie.engine import Engine
 
@@ -92,24 +91,8 @@ class ShipPhysics:
                                (self.__body.position + (32,32))) # + (64, 64))) # 64x64 Offset to center of image.
 
         local_destination = vect_to_destination.rotated(self.__body.angle)
-
         local_angle_to_dest = vect_to_rad(local_destination)
-
         coef_to_dest = local_angle_to_dest / math.pi
-
-        # print(ff)
-
-        # print(coef_to_dest)
-
-        # angle_to_destination = math.acos(vect_to_destination.normalized().dot(self.__body.rotation_vector.normalized()))
-
-        # /
-        # f = (math.pi - abs(abs(self.__body.angle - local_angle_to_dest) - math.pi))
-
-        # /
-        # body_angle = math.fmod(self.__body.angle, 2*math.pi)+2*math.pi
-        # dest_angle = math.fmod(angle_to_destination, 2*math.pi)+2*math.pi
-        # print(dest_angle - body_angle)
 
         # Rotation calcs
         ff = (local_destination[0] - local_destination[1])/self.__body.mass
@@ -119,8 +102,6 @@ class ShipPhysics:
         # Rotational
         mag = self.__body.mass*100
         dm = self.__body.mass*100
-
-        print(coef_to_dest)
 
         f = coef_to_dest * mag
         dmp = -dm * abs(coef_to_dest) * self.__body.angular_velocity
@@ -133,7 +114,6 @@ class ShipPhysics:
 
         self.fore_port_thrust(-f)
         self.fore_port_thrust(dmp)
-
 
     def _reset(self):
         self.__body.reset_forces()
@@ -207,7 +187,6 @@ class PhysicsDemo(Engine):
         self.add_render_plain(Ship(self.__space,
                                    self.assets.animations['ship1'],
                                    center=(512, 256)))
-
 
     def update(self):
         Engine.update(self)

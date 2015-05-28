@@ -53,5 +53,5 @@ if __name__ == "__main__":
     pygame.init()
 
     game = ParallaxDemo(pygame.display.set_mode((1024, 512), 0, 32),
-                        non_static_background=True)
+                        static_background=False)
     game.start()

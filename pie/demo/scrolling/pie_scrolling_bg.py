@@ -10,7 +10,7 @@ class ScrollingBgDemo(Engine):
 
         self.bg = RepeatingImage(
             Image(
-                pygame.image.load("assets/composite/sf1_bg_near.png").convert(),
+                pygame.image.load("../assets/composite/sf1_bg_near.png").convert(),
                 parallax_distance=5),
         )
 

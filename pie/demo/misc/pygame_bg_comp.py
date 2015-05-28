@@ -5,10 +5,16 @@ from pie.math import sub_size
 
 
 if __name__ == "__main__":
+    numpy
     pygame.init()
     pygame.surfarray.use_arraytype('numpy')
 
     def dodge(front, back):
+        """
+        :param front:
+        :param back:
+        :return:
+        """
         result=back*256.0/(256.0-front)
         result[result>255]=255
         result[front==255]=255
@@ -35,9 +41,14 @@ if __name__ == "__main__":
         clock.tick(60)
         print(clock.get_fps())
 
-        #screen.fill((0,0,0))
+        screen.fill((0,0,0))
 
-        pygame.surfarray.blit_array(screen, dodge(bg2_a, bg1_a))
+        # Dodge (Slow)
+        #pygame.surfarray.blit_array(screen, dodge(bg2_a, bg1_a))
+
+        # Add (Faster but not as pretty)
+        screen.blit(bg1, (0,0), None, pygame.BLEND_RGBA_ADD)
+        screen.blit(bg2, (0,0), None, pygame.BLEND_RGBA_ADD)
 
         pygame.display.flip()
 

@@ -4,7 +4,7 @@ import pygame
 
 from pie.entity.animated import SurfaceSequence
 from pie.animation import AnimationLoop
-from pie.base import MRunnable
+from pie import MRunnable
 
 
 class TestAnimation(unittest.TestCase):

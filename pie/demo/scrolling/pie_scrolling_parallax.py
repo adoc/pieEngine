@@ -21,15 +21,15 @@ class ScrollingBgDemo(Engine):
             # pygame.image.load("assets/composite/sf1_bga_near.png").convert_alpha(),
             # parallax_distance=30),
             lambda: Image(
-            pygame.image.load("assets/composite/sf1_bga_neb1.png").convert(),
+            pygame.image.load("../assets/composite/sf1_bga_neb1.png").convert(),
             blit_flags=pygame.BLEND_RGBA_ADD,
             parallax_distance=20),
             lambda: Image(
-            pygame.image.load("assets/composite/sf1_bga_neb2.png").convert(),
+            pygame.image.load("../assets/composite/sf1_bga_neb2.png").convert(),
             blit_flags=pygame.BLEND_RGBA_ADD,
             parallax_distance=10),
             lambda: Image(
-            pygame.image.load("assets/composite/sf1_bga_neb2.png").convert(),
+            pygame.image.load("../assets/composite/sf1_bga_neb2.png").convert(),
             blit_flags=pygame.BLEND_RGBA_ADD,
             parallax_distance=40),
             # lambda: Image(

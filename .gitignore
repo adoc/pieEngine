@@ -6,5 +6,6 @@ __pycache__
 /pymunk-4.0.0
 /assets
 /docs/_build
-/pygame
 /blur
+/pygame-1.9.1
+/.idea

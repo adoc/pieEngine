@@ -1,7 +1,7 @@
 """
 """
 
-from pie.base import MRunnable
+from pie import MRunnable
 
 
 class Animation(MRunnable):

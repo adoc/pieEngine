@@ -1,6 +1,5 @@
 """Typography handler and other classes.
 """
-from pprint import pprint
 
 import functools
 
@@ -23,6 +22,66 @@ ANTIALIAS = 4
 UNDERLINE = 8
 
 
+class Font:
+    """
+    Primarily a wrapper for :class:`pygame.font.Font` that exposes
+    most of the API, though slightly different.
+    """
+    def __init__(self, font, flags=0, pseudo=False):
+        self.__font = font
+        self.__flags = flags
+        self.__pseudo = pseudo
+
+        if pseudo:
+            if flags & BOLD:
+                font.set_bold(True)
+            if flags & ITALIC:
+                font.set_italic(True)
+        if flags & UNDERLINE:
+            font.set_underline(True)
+
+    @property
+    def is_pseudo(self):
+        return self.__pseudo is True
+
+    @property
+    def linesize(self):
+        return self.__font_get_linesize()
+
+    @property
+    def height(self):
+        return self.__font.get_height()
+
+    @property
+    def ascent(self):
+        return self.__font.get_ascent()
+
+    @property
+    def descent(self):
+        return self.__font.get_descent()
+
+    def metrics(self, text):
+        pass
+
+    def size(self, text):
+        pass
+
+    def render(self, text, color, background=None):
+        """Provides low level font rendering, retrieving the font using
+        the :class:`FontHandler`
+
+        :param str text:
+        :param :class:`pygame.Color` color:
+        :param int flags:
+        :param :class:`pygame.Color` background:
+
+        :rtype :class:`pygame.Surface`:
+        :return: Surface of the rendered text.
+        """
+
+        return self.__font.render(text, self.__flags & ANTIALIAS, color,
+                                  background)
+
 class FontHandler:
     """Font asset and rendering handler.
     """
@@ -34,7 +93,8 @@ class FontHandler:
             BOLD | ITALIC: functools.partial(pygame.font.match_font, bold=True,
                                              italic=True)}
 
-    def __init__(self, parse_fonts={}, fonts={}, load_defaults=True):
+    def __init__(self, parse_fonts={}, fonts={}, load_defaults=True,
+                 default_flags=0):
         default = {
                     'montserrat':None,
                     'helvetica':None,
@@ -63,7 +123,10 @@ class FontHandler:
                                                              'terminal',
                                                              'system')
 
+        self.__default_flags = default_flags
+
         self.__cull_fonts_filepath()
+
         self.__fonts = {}
 
     @staticmethod
@@ -123,16 +186,6 @@ class FontHandler:
                 else:
                     fam_filepaths.add(family[n])
 
-    def __get_filepath(self, name, flags=0):
-        if name not in self.__fonts_filepath:
-            raise ValueError('Font name: "%s" must be registered with'
-                             'the FontHandler. Use `FontHandler.register`' %
-                             name)
-        try:
-            return self.__fonts_filepath[name][flags]
-        except KeyError:
-            pass
-
     def get_font(self, name, size, flags=0):
         """
         Also acts as a cache pre-loader.
@@ -144,52 +197,35 @@ class FontHandler:
         :rtype :class:`pygame.font.Font`:
         :return: Font with specified flags.
         """
-        filepath = self.__get_filepath(name, flags=flags)
 
-        # Regular file path to be pseudo-bold and/or italic later.
-        r_filepath = not filepath and self.__fonts_filepath[name][0]
+        flags = self.__default_flags | flags
 
-        if not filepath and not r_filepath:
-            raise ValueError('Font "%s" {size: %s, flags: %s} '
-                             'was not found nor did its family have a '
-                             'Regular member to use.' % (name, size, flags))
+        if name not in self.__fonts_filepath:
+            raise ValueError('Font "%s" is not registered with the '
+                             'FontHandler. Use `FontHandler.register` to do '
+                             'so' % name)
+        try:
+            filepath =  self.__fonts_filepath[name][flags &
+                                                    (REGULAR | BOLD | ITALIC)]
+            # Restrict the flags to the ones that determine the file.
+        except KeyError:
+            filepath = self.__fonts_filepath[name][0]
+            # Due to previous `if` can only be KeyError on `flags`.
 
-        filepath = filepath or r_filepath
+            if not filepath:
+                raise ValueError('Font "%s" {size: %s, flags: %s} was not '
+                                 'found nor did its family have a Regular '
+                                 'member to use.' % (name, size, flags))
 
-        key = (filepath, size, flags & (BOLD | ITALIC | UNDERLINE))
+            pseudo=True
+        else:
+            pseudo = False
+
+        key = (filepath, size, flags)
 
         # Do we already have the font in cache?
         if key not in self.__fonts:
-            self.__fonts[key] = font = pygame.font.Font(filepath, size)
-            # Apply pseudo-bold and/or italic if regular file.
-            if r_filepath:
-                if flags & BOLD:
-                    font.set_bold(True)
-                if flags & ITALIC:
-                    font.set_italic(True)
-            # Apply underline.
-            if flags & UNDERLINE:
-                font.set_underline(True)
+            self.__fonts[key] = Font(pygame.font.Font(filepath, size),
+                                     flags=flags, pseudo=pseudo)
 
         return self.__fonts[key]
-
-# TODO: Move in to appropriate entity.
-def render(fonts, name, size, text, color, flags=0, background=None):
-    """Provides low level font rendering, retrieving the font using
-    the :class:`FontHandler`
-
-    :param `FontHandler` fonts:
-    :param str name:
-    :param int size:
-    :param str text:
-    :param :class:`pygame.Color` color:
-    :param int flags:
-    :param :class:`pygame.Color` background:
-
-    :rtype :class:`pygame.Surface`:
-    :return: Surface of the rendered text.
-    """
-
-    font = fonts.get_font(name, size, flags=flags)
-    return font.render(text, flags & ANTIALIAS, color,
-                       background=background)

@@ -119,7 +119,6 @@ class Zg(Engine):
                          flip_y_normals(poly_verts[-1],
                                         self.screen_height))
 
-
 # Keep this minimal.
 if __name__ == "__main__":
     pygame.init()

@@ -3,11 +3,10 @@
 
 #TODO: Review for 0.1.2
 
-import numpy
-import pygame
 
+from pie import *
 from pie.entity import *
-from pie.math import offset_to_axis
+
 
 __all__ = ('Rect',
            'Surface',

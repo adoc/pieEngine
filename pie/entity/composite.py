@@ -5,7 +5,8 @@ import pygame
 import pygame.math
 
 import pie._pygame.sprite
-from pie.entity import MIdentity, MSurfaceRect
+from pie.entity import MSurfaceRect
+from pie import MIdentity
 from pie.entity.base import *
 from pie.entity.animated import SequenceAnimation
 from pie.math import vect_diff, sinus

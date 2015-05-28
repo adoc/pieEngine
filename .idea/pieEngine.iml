@@ -11,7 +11,7 @@
       <excludeFolder url="file://$MODULE_DIR$/env" />
       <excludeFolder url="file://$MODULE_DIR$/pieEngine.egg-info" />
       <excludeFolder url="file://$MODULE_DIR$/pie_examples" />
-      <excludeFolder url="file://$MODULE_DIR$/pygame" />
+      <excludeFolder url="file://$MODULE_DIR$/pygame-1.9.1" />
       <excludeFolder url="file://$MODULE_DIR$/pymunk-4.0.0" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.4.2 virtualenv at C:\Users\coda\PycharmProjects\pieEngine\env" jdkType="Python SDK" />

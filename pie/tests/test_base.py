@@ -1,6 +1,6 @@
 import unittest
 
-from pie.base import MRunnable
+from pie import MRunnable
 
 
 class TestMRunnable(unittest.TestCase):

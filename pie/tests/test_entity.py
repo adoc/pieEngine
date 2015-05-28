@@ -2,6 +2,7 @@ import unittest
 import uuid
 # from entity.animated import MAnimated
 from random import SystemRandom
+import pie
 
 from pie.entity.primitive import Fill
 
@@ -19,31 +20,31 @@ class TestModuleFuncs(unittest.TestCase):
     """
 
     def setUp(self):
-        pie.entity._reset_entity_ord(confirm=True)
+        pie._reset_entity_ord(confirm=True)
 
     def test_next_entity_ord(self):
         for i in range(1, 100):
-            self.assertEqual(pie.entity.next_entity_ord(), i)
+            self.assertEqual(pie.next_entity_ord(), i)
 
     def test__reset_entity_ord(self):
         for i in range(1, 100):
-            self.assertEqual(pie.entity.next_entity_ord(), i)
+            self.assertEqual(pie.next_entity_ord(), i)
 
-        pie.entity._reset_entity_ord()
-        self.assertEqual(pie.entity.next_entity_ord(), 100)
+        pie._reset_entity_ord()
+        self.assertEqual(pie.next_entity_ord(), 100)
 
-        pie.entity._reset_entity_ord(confirm=False)
-        self.assertEqual(pie.entity.next_entity_ord(), 101)
+        pie._reset_entity_ord(confirm=False)
+        self.assertEqual(pie.next_entity_ord(), 101)
 
-        pie.entity._reset_entity_ord(confirm=True)
-        self.assertEqual(pie.entity.next_entity_ord(), 1)
+        pie._reset_entity_ord(confirm=True)
+        self.assertEqual(pie.next_entity_ord(), 1)
 
 
 class TestMIdentity(unittest.TestCase):
     def setUp(self):
         self.__ord = 0
         self.__id = 0
-        pie.entity._reset_entity_ord(confirm=True)
+        pie._reset_entity_ord(confirm=True)
 
     def ord_factory(self):
         self.__ord += 1
@@ -55,17 +56,17 @@ class TestMIdentity(unittest.TestCase):
 
     def test_base_entity(self):
         for i in range(1, 100):
-            entity = pie.entity.MIdentity()
+            entity = pie.MIdentity()
             self.assertEqual(entity.ord, i+i-1)
             self.assertIsInstance(entity.id, uuid.UUID)
 
-            entity = pie.entity.MIdentity(ord_factory=self.ord_factory)
+            entity = pie.MIdentity(ord_factory=self.ord_factory)
             self.assertEqual(entity.ord, self.__ord)
 
-            entity = pie.entity.MIdentity(id_factory=self.id_factory)
+            entity = pie.MIdentity(id_factory=self.id_factory)
             self.assertEqual(entity.id, self.__id)
 
-            entity = pie.entity.MIdentity(ord_factory=self.ord_factory,
+            entity = pie.MIdentity(ord_factory=self.ord_factory,
                                 id_factory=self.id_factory)
             self.assertEqual(entity.ord, self.__ord)
             self.assertEqual(entity.id, self.__id)
